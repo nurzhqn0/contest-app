@@ -2,6 +2,12 @@ export type RoomStatus = "active" | "upcoming" | "archived";
 export type TaskType = "quantity" | "range" | "yes_no" | "text";
 export type StudentStatus = "active" | "blocked";
 
+export interface Organizer {
+  id: number;
+  username: string;
+  created_at: string;
+}
+
 export interface Room {
   id: number;
   name: string;

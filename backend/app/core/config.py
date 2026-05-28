@@ -6,6 +6,11 @@ class Settings(BaseSettings):
     api_prefix: str = "/api/v1"
     secret_key: str = "change-me-in-production"
     access_token_expire_minutes: int = 60 * 24
+    auth_cookie_name: str = "student_contest_session"
+    auth_cookie_secure: bool = False
+    auth_cookie_samesite: str = "lax"
+    csrf_cookie_name: str = "student_contest_csrf"
+    csrf_header_name: str = "X-CSRF-Token"
     database_url: str = "sqlite:///./student_contest.db"
     admin_username: str = "admin"
     admin_password: str = "admin123"

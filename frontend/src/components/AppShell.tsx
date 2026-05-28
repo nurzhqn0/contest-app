@@ -1,9 +1,10 @@
 import { ArrowSquareOut, SignOut, SquaresFour } from "@phosphor-icons/react";
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
-import { clearToken } from "../lib/auth";
+import { useAuth } from "../lib/auth";
 
 export function AppShell() {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
 
   return (
     <div className="page-shell flex min-h-[100dvh] flex-col py-4 md:py-6">
@@ -52,8 +53,8 @@ export function AppShell() {
             <button
               type="button"
               className="button-secondary"
-              onClick={() => {
-                clearToken();
+              onClick={async () => {
+                await signOut();
                 navigate("/login");
               }}
             >
