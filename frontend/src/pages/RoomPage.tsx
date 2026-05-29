@@ -1420,6 +1420,7 @@ export function RoomPage() {
         </SectionCard>
 
         <SectionCard
+          className="overflow-x-auto"
           title="Penalties"
           eyebrow={punishmentForm.id ? "Edit penalty" : "Create penalty"}
           description="Use penalties for rule violations, missed requirements, or additional corrective tasks."
