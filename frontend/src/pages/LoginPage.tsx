@@ -129,16 +129,6 @@ export function LoginPage() {
       >
         <div className="space-y-4">
           <div className="eyebrow">Organizer sign-in</div>
-          <div className="space-y-3">
-            <h2 className="text-3xl font-semibold tracking-[-0.04em] text-ink md:text-4xl">
-              Access the workspace
-            </h2>
-            <p className="copy-pretty max-w-[56ch] text-sm leading-relaxed text-muted">
-              Use the default admin credentials for the local build, then
-              replace them through backend environment variables before
-              deploying.
-            </p>
-          </div>
         </div>
 
         <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
