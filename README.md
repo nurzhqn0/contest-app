@@ -2,6 +2,13 @@
 
 MVP веб-платформы и Telegram-бота для студенческих конкурсов по ТЗ от 28 мая 2026.
 
+## Deployment guides
+
+- VPS setup: [docs/vps-deploy.md](docs/vps-deploy.md)
+- VPS operations: [docs/vps-operations.md](docs/vps-operations.md)
+- Production mode binds the internal app proxy to `127.0.0.1:${APP_PROXY_BIND_PORT:-8081}` by default to avoid common VPS port conflicts.
+- Domain and subdomain setup for a real VPS deploy is documented in [docs/vps-deploy.md](docs/vps-deploy.md#0-connect-your-domain).
+
 ## Что реализовано
 
 - `backend/`: FastAPI API с SQLite, JWT-авторизацией, комнатами, заданиями, участниками, прогрессом, лидербордом, публичной страницей, bot-endpoints, Alembic-миграциями и экспортом `.xlsx`.

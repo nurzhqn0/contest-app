@@ -1,7 +1,6 @@
 import { ReactElement } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AppShell } from "./components/AppShell";
-import { useAuth } from "./lib/auth";
 import { DashboardPage } from "./pages/DashboardPage";
 import { LegalPage } from "./pages/LegalPage";
 import { LoginPage } from "./pages/LoginPage";
@@ -9,6 +8,7 @@ import { NotFoundPage } from "./pages/NotFoundPage";
 import { PublicHomePage } from "./pages/PublicHomePage";
 import { PublicRoomPage } from "./pages/PublicRoomPage";
 import { RoomPage } from "./pages/RoomPage";
+import { useAuth } from "./lib/auth";
 
 function ProtectedRoute({ children }: { children: ReactElement }) {
   const { status } = useAuth();

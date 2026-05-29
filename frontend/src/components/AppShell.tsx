@@ -20,18 +20,25 @@ export function AppShell() {
             </div>
             <div className="space-y-1">
               <div className="eyebrow">Organizer workspace</div>
-              <div className="text-xl font-semibold tracking-[-0.03em] text-ink">Student Contest</div>
+              <div className="text-xl font-semibold tracking-[-0.03em] text-ink">
+                Student Contest
+              </div>
             </div>
           </Link>
 
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between xl:justify-end">
-            <nav aria-label="Primary" className="flex flex-wrap items-center gap-2">
+            <nav
+              aria-label="Primary"
+              className="flex flex-wrap items-center gap-2"
+            >
               <NavLink
                 to="/app"
                 end
                 className={({ isActive }) =>
                   `rounded-md px-3 py-2 text-sm font-medium transition duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                    isActive ? "bg-ink text-white" : "border border-line bg-white text-ink hover:border-accent/35 hover:bg-accentSoft/35"
+                    isActive
+                      ? "bg-ink text-white"
+                      : "border border-line bg-white text-ink hover:border-accent/35 hover:bg-accentSoft/35"
                   }`
                 }
               >
@@ -41,7 +48,9 @@ export function AppShell() {
                 to="/"
                 className={({ isActive }) =>
                   `inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                    isActive ? "bg-ink text-white" : "border border-line bg-white text-ink hover:border-accent/35 hover:bg-accentSoft/35"
+                    isActive
+                      ? "bg-ink text-white"
+                      : "border border-line bg-white text-ink hover:border-accent/35 hover:bg-accentSoft/35"
                   }`
                 }
               >
