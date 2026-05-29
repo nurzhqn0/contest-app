@@ -121,7 +121,7 @@ export function LoginPage() {
             </article>
 
             <article className="surface-muted flex min-h-[220px] flex-col justify-between p-5">
-              <div className="space-y-3">
+              <div className="space-y-3 mb-3">
                 <div className="eyebrow">Snapshot</div>
                 <h2 className="text-2xl font-semibold tracking-[-0.03em] text-ink">
                   Built for operational clarity.
@@ -145,7 +145,7 @@ export function LoginPage() {
             </article>
           </div>
         </div>
-
+        {/* 
         <div className="mt-8 grid gap-3 md:grid-cols-3">
           {capabilities.map((item, index) => (
             <article
@@ -167,7 +167,7 @@ export function LoginPage() {
               </div>
             </article>
           ))}
-        </div>
+        </div> */}
       </section>
 
       <section
@@ -227,14 +227,6 @@ export function LoginPage() {
         </form>
 
         <div className="mt-8 space-y-4">
-          <div className="surface-muted p-4">
-            <div className="eyebrow">Local default</div>
-            <p className="mt-2 text-sm leading-relaxed text-muted">
-              Username <span className="mono-data text-ink">admin</span> and
-              password <span className="mono-data text-ink">admin123</span>.
-            </p>
-          </div>
-
           <div className="flex flex-wrap items-center gap-4 text-sm text-muted">
             <Link to="/" className="button-tertiary">
               Open public room lookup
