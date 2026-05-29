@@ -167,6 +167,15 @@ body::before {
   box-shadow: 0 0 0 4px rgba(41, 92, 72, 0.12);
 }
 
+@media (hover: none) and (pointer: coarse) {
+  .field,
+  input.field,
+  select.field,
+  textarea.field {
+    font-size: 16px;
+  }
+}
+
 @keyframes shimmer {
   100% {
     transform: translateX(100%);
