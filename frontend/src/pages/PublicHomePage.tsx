@@ -15,18 +15,15 @@ const publicSteps = [
     description:
       "They start the @oina_buddybot, enter the room code, add a name, and receive today’s task prompts.",
     icon: TelegramLogo,
+    link: "https://t.me/oina_buddybot",
   },
   {
     title: "Guests open the public room page",
     description:
       "The same room code opens the public leaderboard when the organiser allows public access.",
     icon: GlobeHemisphereWest,
+    link: "/room/example",
   },
-  // {
-  //   title: "Visibility rules stay in control",
-  //   description: "Names, aliases, anonymous mode, and score visibility follow organiser settings automatically.",
-  //   icon: ShieldCheck
-  // }
 ];
 
 export function PublicHomePage() {
@@ -65,21 +62,26 @@ export function PublicHomePage() {
         <div className="mt-10 grid gap-4 md:grid-cols-[1.1fr_0.9fr]">
           <div className="space-y-4">
             {publicSteps.map((item, index) => (
-              <article
+              <a
                 key={item.title}
-                className="reveal rounded-lg border border-line bg-[#f7f6f2]/85 p-4"
+                href={item.link}
+                target={item.link.startsWith("http") ? "_blank" : undefined}
+                rel={item.link.startsWith("http") ? "noreferrer" : undefined}
+                className="reveal block rounded-lg border border-line bg-[#f7f6f2]/85 p-4 transition hover:-translate-y-0.5 hover:border-accent hover:bg-white"
                 style={{ ["--index" as string]: index + 1 }}
               >
                 <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-white text-accent">
                   <item.icon size={20} weight="duotone" />
                 </div>
+
                 <h2 className="text-lg font-semibold tracking-[-0.03em] text-ink">
                   {item.title}
                 </h2>
+
                 <p className="mt-2 text-sm leading-relaxed text-muted">
                   {item.description}
                 </p>
-              </article>
+              </a>
             ))}
           </div>
 
@@ -92,16 +94,7 @@ export function PublicHomePage() {
                   Room code
                 </div>
                 <div className="mono-data text-2xl font-semibold tracking-[0.14em] text-ink">
-                  RAM25
-                </div>
-              </div>
-              <div className="rounded-lg border border-line bg-white p-4">
-                <div className="mb-2 flex items-center gap-2 text-sm font-medium text-ink">
-                  <Medal size={16} weight="duotone" />
-                  Public URL
-                </div>
-                <div className="mono-data break-all text-sm text-muted">
-                  yourapp.com/room/RAM25
+                  CODE
                 </div>
               </div>
             </div>
