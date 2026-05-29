@@ -10,35 +10,11 @@ import { FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 
-const capabilities = [
-  {
-    label: "Access",
-    title: "Admin sign-in with JWT",
-    description:
-      "Organisers manage rooms, scoring, exports, visibility, and Telegram settings from one workspace.",
-    icon: ShieldCheck,
-  },
-  {
-    label: "Automation",
-    title: "Telegram registration and reminders",
-    description:
-      "Participants join with a room code, submit daily tasks, and receive reminders without leaving Telegram.",
-    icon: TelegramLogo,
-  },
-  {
-    label: "Reporting",
-    title: "Live leaderboard and Excel export",
-    description:
-      "Every update recalculates ranking data and keeps room reports ready for review or handover.",
-    icon: DownloadSimple,
-  },
-];
-
 export function LoginPage() {
   const navigate = useNavigate();
   const { signIn } = useAuth();
-  const [username, setUsername] = useState("admin");
-  const [password, setPassword] = useState("admin123");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -145,29 +121,6 @@ export function LoginPage() {
             </article>
           </div>
         </div>
-        {/* 
-        <div className="mt-8 grid gap-3 md:grid-cols-3">
-          {capabilities.map((item, index) => (
-            <article
-              key={item.title}
-              className="reveal rounded-lg border border-line bg-white p-4"
-              style={{ ["--index" as string]: index + 1 }}
-            >
-              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-[#f7f6f2] text-accent">
-                <item.icon size={20} weight="duotone" />
-              </div>
-              <div className="space-y-2">
-                <div className="eyebrow">{item.label}</div>
-                <h3 className="text-base font-semibold text-ink">
-                  {item.title}
-                </h3>
-                <p className="copy-pretty text-sm leading-relaxed text-muted">
-                  {item.description}
-                </p>
-              </div>
-            </article>
-          ))}
-        </div> */}
       </section>
 
       <section
@@ -195,7 +148,6 @@ export function LoginPage() {
               className="field"
               value={username}
               onChange={(event) => setUsername(event.target.value)}
-              placeholder="admin"
             />
           </label>
 
@@ -206,7 +158,6 @@ export function LoginPage() {
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               type="password"
-              placeholder="admin123"
             />
           </label>
 

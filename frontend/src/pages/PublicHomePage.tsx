@@ -136,7 +136,7 @@ export function PublicHomePage() {
             <input
               className="field mono-data text-center text-2xl uppercase tracking-[0.28em]"
               maxLength={12}
-              placeholder="RAM25"
+              placeholder="CODE"
               value={roomCode}
               onChange={(event) =>
                 setRoomCode(event.target.value.toUpperCase())
