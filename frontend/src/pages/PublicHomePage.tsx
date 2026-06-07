@@ -3,8 +3,6 @@ import {
   TelegramLogo,
   Chats,
   TrendUp,
-  FileXls,
-  ShieldCheck,
   Question,
   UserGear,
   Sparkle,
@@ -40,53 +38,50 @@ export function PublicHomePage() {
   }
 
   return (
-    <Box className="relative min-h-screen overflow-hidden bg-canvas py-8 md:py-16">
+    <main className="relative min-h-screen overflow-hidden bg-canvas py-8 md:py-16">
       {/* Decorative Floating Glowing Blobs */}
-      <Box className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-accent/5 blur-[120px] floating-blob pointer-events-none" />
-      <Box className="absolute bottom-[-10%] right-[-10%] w-[45vw] h-[45vw] rounded-full bg-teal-500/5 blur-[120px] floating-blob-delayed pointer-events-none" />
-      <Box className="absolute top-[30%] right-[15%] w-[30vw] h-[30vw] rounded-full bg-yellowSoft/15 blur-[100px] floating-blob pointer-events-none" />
+      <Box aria-hidden="true" className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-accent/5 blur-[120px] floating-blob pointer-events-none" />
+      <Box aria-hidden="true" className="absolute bottom-[-10%] right-[-10%] w-[45vw] h-[45vw] rounded-full bg-teal-500/5 blur-[120px] floating-blob-delayed pointer-events-none" />
+      <Box aria-hidden="true" className="absolute top-[30%] right-[15%] w-[30vw] h-[30vw] rounded-full bg-yellowSoft/15 blur-[100px] floating-blob pointer-events-none" />
 
       <Container size="4" className="relative z-10 px-4">
         {/* Top Header / Branding */}
-        <Flex
-          justify="between"
-          align="center"
-          className="mb-12 md:mb-20 pb-4 border-b border-line/40"
-        >
+        <header className="flex justify-between items-center mb-12 md:mb-20 pb-4 border-b border-line/40">
           <Flex align="center" gap="3">
             <Box className="flex h-10 w-10 items-center justify-center rounded-none bg-accent text-white shadow-md">
-              <Sparkle size={20} weight="fill" />
+              <Sparkle size={20} weight="fill" aria-hidden="true" />
             </Box>
             <Box>
-              <Heading
+              <Text
                 size="4"
                 weight="bold"
-                className="tracking-tight text-ink"
+                className="tracking-tight text-ink font-bold block"
               >
                 Oina.io
-              </Heading>
+              </Text>
               <Text
                 size="1"
-                className="text-muted font-mono tracking-widest uppercase"
+                className="text-muted font-mono tracking-widest uppercase block"
               >
                 Challenge Hub
               </Text>
             </Box>
           </Flex>
 
-          <Link to="/login" className="no-underline">
-            <Button
-              size="2"
-              color="teal"
-              variant="ghost"
-              radius="none"
-              className="cursor-pointer font-medium flex items-center gap-2"
-            >
-              <UserGear size={16} />
+          <Button
+            size="2"
+            color="teal"
+            variant="ghost"
+            radius="none"
+            className="cursor-pointer font-medium flex items-center gap-2"
+            asChild
+          >
+            <Link to="/login">
+              <UserGear size={16} aria-hidden="true" />
               Organizer sign-in
-            </Button>
-          </Link>
-        </Flex>
+            </Link>
+          </Button>
+        </header>
 
         {/* Hero Grid Section */}
         <Grid
@@ -95,39 +90,39 @@ export function PublicHomePage() {
           align="center"
           className="mb-20"
         >
-          {/* Left Column: Core Value Proposition */}
-          <Flex direction="column" gap="5" align="start" justify="center" className="h-full">
-            <Badge
-              size="2"
-              color="teal"
-              variant="soft"
-              radius="none"
-              className="px-3 py-1 font-medium"
-            >
-              ✦ Built for Daily Consistency
-            </Badge>
+          {/* Left Column: Core Value Proposition & Access Card */}
+          <Flex direction="column" gap="6" align="start" justify="center" className="h-full">
+            <Flex direction="column" gap="4" align="start">
+              <Badge
+                size="2"
+                color="teal"
+                variant="soft"
+                radius="none"
+                className="px-3 py-1 font-medium"
+              >
+                ✦ Built for Daily Consistency
+              </Badge>
 
-            <Heading
-              size="8"
-              weight="bold"
-              className="tracking-tight font-display text-gradient-primary"
-              style={{ lineHeight: 1.15, fontSize: "clamp(2.2rem, 4.5vw, 3.2rem)" }}
-            >
-              Build consistency. <br />Climb the leaderboard.
-            </Heading>
+              <Heading
+                as="h1"
+                size="8"
+                weight="bold"
+                className="tracking-tight font-display text-gradient-primary"
+                style={{ lineHeight: 1.15, fontSize: "clamp(2.2rem, 4.5vw, 3.2rem)" }}
+              >
+                Build consistency. <br />Climb the leaderboard.
+              </Heading>
 
-            <Text size="3" className="text-muted leading-relaxed max-w-[46ch]">
-              Track your habits, log daily targets, and stay accountable with your group.
-              Connect through our Telegram bot, complete check-ins, and spectate live ranks on the web.
-            </Text>
-          </Flex>
+              <Text size="3" className="text-muted leading-relaxed max-w-[46ch]">
+                Track your habits, log daily targets, and stay accountable with your group.
+                Connect through our Telegram bot, complete check-ins, and spectate live ranks on the web.
+              </Text>
+            </Flex>
 
-          {/* Right Column: Entry Form Card */}
-          <Flex justify="center" align="center">
             {/* Access Form Card */}
             <Card
               size="3"
-              className="w-full max-w-[400px] p-6 bg-white border border-line shadow-sm rounded-none"
+              className="w-full max-w-[400px] p-6 bg-white border border-line shadow-sm rounded-none mt-2"
             >
               <Flex direction="column" gap="4">
                 <Box className="space-y-1">
@@ -140,7 +135,7 @@ export function PublicHomePage() {
                   >
                     Spectator Mode
                   </Badge>
-                  <Heading size="4" weight="bold" className="text-ink tracking-tight">
+                  <Heading as="h2" size="4" weight="bold" className="text-ink tracking-tight">
                     Access Room Leaderboard
                   </Heading>
                   <Text size="2" className="text-muted">
@@ -150,10 +145,17 @@ export function PublicHomePage() {
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <Flex direction="column" gap="2">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-muted">
+                    <label 
+                      htmlFor="room-code-input"
+                      className="text-[10px] font-bold uppercase tracking-wider text-muted cursor-pointer"
+                    >
                       Room Code
                     </label>
                     <TextField.Root
+                      id="room-code-input"
+                      name="roomCode"
+                      autoComplete="off"
+                      spellCheck={false}
                       size="3"
                       maxLength={12}
                       placeholder="ENTER ROOM CODE"
@@ -163,9 +165,8 @@ export function PublicHomePage() {
                         if (error) setError("");
                       }}
                       radius="none"
-                      className="w-full font-mono text-center tracking-[0.25em] uppercase [&>input]:text-center [&>input]:text-xl [&>input]:font-bold [&>input]:h-12 border-line focus:border-accent"
-                    >
-                    </TextField.Root>
+                      className="w-full font-mono text-center tracking-[0.25em] uppercase [&>input]:text-center [&>input]:text-xl [&>input]:font-bold [&>input]:h-12 border-line focus-within:border-accent"
+                    />
                     {error && (
                       <Text size="1" color="red" weight="medium">
                         {error}
@@ -187,6 +188,72 @@ export function PublicHomePage() {
               </Flex>
             </Card>
           </Flex>
+
+          {/* Right Column: iPhone Video Container */}
+          <Flex align="center" justify="center" direction="column" className="w-full">
+            {/* iPhone 15 Pro Frame */}
+            <Box
+              className="relative w-[260px] h-[520px] bg-[#1f1f1f] p-[10px] border-[3px] border-[#3d3d3d] shadow-2xl overflow-hidden"
+              style={{ borderRadius: "40px" }}
+            >
+              {/* Dynamic Island */}
+              <Box
+                className="absolute top-[18px] left-1/2 -translate-x-1/2 w-[80px] h-[22px] bg-black z-50"
+                style={{ borderRadius: "11px" }}
+              />
+
+              {/* Screen Area */}
+              <Box
+                className="relative w-full h-full bg-[#111] overflow-hidden flex flex-col"
+                style={{ borderRadius: "30px" }}
+              >
+                {/* iOS Status Bar Overlay */}
+                <Flex
+                  justify="between"
+                  align="end"
+                  className="absolute top-0 left-0 right-0 h-[38px] px-5 pb-1 text-[10px] font-semibold text-white bg-gradient-to-b from-black/50 to-transparent z-40 pointer-events-none"
+                >
+                  <Text>9:41</Text>
+                  <Flex gap="1" align="center">
+                    <span>📶</span>
+                    <span>🔋</span>
+                  </Flex>
+                </Flex>
+
+                {/* Video Player */}
+                <Box className="flex-1 w-full h-full flex items-center justify-center bg-accent/95 relative">
+                  <video
+                    src="/onboarding-demo.mp4"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    controls
+                    className="w-full h-full object-cover"
+                  />
+                </Box>
+
+                {/* Home Indicator Overlay */}
+                <Flex
+                  align="center"
+                  justify="center"
+                  className="absolute bottom-0 left-0 right-0 h-[15px] bg-gradient-to-t from-black/30 to-transparent z-40 pointer-events-none"
+                >
+                  <Box className="w-[90px] h-[4px] bg-white/80 rounded-full" />
+                </Flex>
+              </Box>
+            </Box>
+
+            {/* Video Caption */}
+            <Box className="mt-4 text-center max-w-[250px]">
+              <Text size="1" weight="bold" color="teal" className="uppercase tracking-wider block mb-1">
+                Onboarding Demo
+              </Text>
+              <Text size="1" className="text-muted leading-relaxed">
+                Watch the Telegram check-in walk-through video.
+              </Text>
+            </Box>
+          </Flex>
         </Grid>
 
         {/* Feature Sections / Flow Steps */}
@@ -207,6 +274,7 @@ export function PublicHomePage() {
               Workflows
             </Badge>
             <Heading
+              as="h2"
               size="7"
               weight="bold"
               className="tracking-tight text-ink font-display"
@@ -231,10 +299,10 @@ export function PublicHomePage() {
                 className="h-full justify-between"
               >
                 <Box className="flex h-10 w-10 items-center justify-center rounded-none bg-blueSoft text-blue-600">
-                  <TelegramLogo size={28} weight="duotone" />
+                  <TelegramLogo size={28} weight="duotone" aria-hidden="true" />
                 </Box>
                 <Box>
-                  <Heading size="4" weight="bold" className="mb-2 text-ink">
+                  <Heading as="h3" size="4" weight="bold" className="mb-2 text-ink">
                     1. Join the Telegram Bot
                   </Heading>
                   <Text size="2" className="text-muted leading-relaxed">
@@ -242,7 +310,7 @@ export function PublicHomePage() {
                     <a
                       href="https://t.me/oina_buddybot"
                       target="_blank"
-                      rel="noreferrer"
+                      rel="noopener noreferrer"
                       className="text-accent underline font-medium"
                     >
                       @oina_buddybot
@@ -265,10 +333,10 @@ export function PublicHomePage() {
                 className="h-full justify-between"
               >
                 <Box className="flex h-10 w-10 items-center justify-center rounded-none bg-yellowSoft text-amber-600">
-                  <GlobeHemisphereWest size={28} weight="duotone" />
+                  <GlobeHemisphereWest size={28} weight="duotone" aria-hidden="true" />
                 </Box>
                 <Box>
-                  <Heading size="4" weight="bold" className="mb-2 text-ink">
+                  <Heading as="h3" size="4" weight="bold" className="mb-2 text-ink">
                     2. Track Your Progress
                   </Heading>
                   <Text size="2" className="text-muted leading-relaxed">
@@ -290,10 +358,10 @@ export function PublicHomePage() {
                 className="h-full justify-between"
               >
                 <Box className="flex h-10 w-10 items-center justify-center rounded-none bg-accentSoft text-accent">
-                  <TrendUp size={28} weight="duotone" />
+                  <TrendUp size={28} weight="duotone" aria-hidden="true" />
                 </Box>
                 <Box>
-                  <Heading size="4" weight="bold" className="mb-2 text-ink">
+                  <Heading as="h3" size="4" weight="bold" className="mb-2 text-ink">
                     3. Watch the Standings
                   </Heading>
                   <Text size="2" className="text-muted leading-relaxed">
@@ -325,6 +393,7 @@ export function PublicHomePage() {
                 Core Features
               </Badge>
               <Heading
+                as="h2"
                 size="7"
                 weight="bold"
                 className="tracking-tight text-ink font-display"
@@ -340,10 +409,10 @@ export function PublicHomePage() {
             <Grid columns={{ initial: "1", sm: "2" }} gap="4">
               <Flex gap="3" align="start">
                 <Box className="p-2 rounded-none bg-white border border-line text-accent flex-shrink-0">
-                  <Chats size={20} weight="duotone" />
+                  <Chats size={20} weight="duotone" aria-hidden="true" />
                 </Box>
                 <Box>
-                  <Heading size="3" weight="bold" className="text-ink mb-1">
+                  <Heading as="h3" size="3" weight="bold" className="text-ink mb-1">
                     Instant Logging
                   </Heading>
                   <Text size="2" className="text-muted">
@@ -355,10 +424,10 @@ export function PublicHomePage() {
 
               <Flex gap="3" align="start">
                 <Box className="p-2 rounded-none bg-white border border-line text-accent flex-shrink-0">
-                  <TrendUp size={20} weight="duotone" />
+                  <TrendUp size={20} weight="duotone" aria-hidden="true" />
                 </Box>
                 <Box>
-                  <Heading size="3" weight="bold" className="text-ink mb-1">
+                  <Heading as="h3" size="3" weight="bold" className="text-ink mb-1">
                     Live Leaderboard
                   </Heading>
                   <Text size="2" className="text-muted">
@@ -370,10 +439,10 @@ export function PublicHomePage() {
 
               <Flex gap="3" align="start">
                 <Box className="p-2 rounded-none bg-white border border-line text-accent flex-shrink-0">
-                  <Chats size={20} weight="duotone" />
+                  <Chats size={20} weight="duotone" aria-hidden="true" />
                 </Box>
                 <Box>
-                  <Heading size="3" weight="bold" className="text-ink mb-1">
+                  <Heading as="h3" size="3" weight="bold" className="text-ink mb-1">
                     Streak Protection
                   </Heading>
                   <Text size="2" className="text-muted">
@@ -385,10 +454,10 @@ export function PublicHomePage() {
 
               <Flex gap="3" align="start">
                 <Box className="p-2 rounded-none bg-white border border-line text-accent flex-shrink-0">
-                  <Sparkle size={20} weight="duotone" />
+                  <Sparkle size={20} weight="duotone" aria-hidden="true" />
                 </Box>
                 <Box>
-                  <Heading size="3" weight="bold" className="text-ink mb-1">
+                  <Heading as="h3" size="3" weight="bold" className="text-ink mb-1">
                     Bonus Milestones
                   </Heading>
                   <Text size="2" className="text-muted">
@@ -419,6 +488,7 @@ export function PublicHomePage() {
               Support
             </Badge>
             <Heading
+              as="h2"
               size="6"
               weight="bold"
               className="tracking-tight text-ink font-display"
@@ -430,11 +500,12 @@ export function PublicHomePage() {
           <Flex direction="column" gap="4">
             <Card size="2" className="bg-surface border border-line">
               <Heading
+                as="h3"
                 size="3"
                 weight="bold"
                 className="mb-1 text-ink flex items-center gap-2"
               >
-                <Question size={18} className="text-accent" />
+                <Question size={18} className="text-accent" aria-hidden="true" />
                 How do I participate?
               </Heading>
               <Text size="2" className="text-muted">
@@ -442,7 +513,7 @@ export function PublicHomePage() {
                 <a
                   href="https://t.me/oina_buddybot"
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   className="text-accent underline font-medium"
                 >
                   @oina_buddybot
@@ -455,11 +526,12 @@ export function PublicHomePage() {
 
             <Card size="2" className="bg-surface border border-line">
               <Heading
+                as="h3"
                 size="3"
                 weight="bold"
                 className="mb-1 text-ink flex items-center gap-2"
               >
-                <Question size={18} className="text-accent" />
+                <Question size={18} className="text-accent" aria-hidden="true" />
                 Where do I get a Room Code?
               </Heading>
               <Text size="2" className="text-muted">
@@ -471,15 +543,16 @@ export function PublicHomePage() {
 
             <Card size="2" className="bg-surface border border-line">
               <Heading
+                as="h3"
                 size="3"
                 weight="bold"
                 className="mb-1 text-ink flex items-center gap-2"
               >
-                <Question size={18} className="text-accent" />
+                <Question size={18} className="text-accent" aria-hidden="true" />
                 Are leaderboards open to the public?
               </Heading>
               <Text size="2" className="text-muted">
-                Yes, as long as the organizer enables "Public room page" in the
+                Yes, as long as the organizer enables “Public room page” in the
                 settings. Observers and guests can open this page, insert the
                 code, and view live progress.
               </Text>
@@ -488,13 +561,7 @@ export function PublicHomePage() {
         </Box>
 
         {/* Premium Footer */}
-        <Flex
-          direction={{ initial: "column", sm: "row" }}
-          justify="between"
-          align="center"
-          gap="4"
-          className="pt-8 border-t border-line/60 text-xs text-muted"
-        >
+        <footer className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-8 border-t border-line/60 text-xs text-muted">
           <Text>© 2026 Oina.io. Built for modern student challenges.</Text>
           <Flex gap="4">
             <Link
@@ -510,8 +577,8 @@ export function PublicHomePage() {
               Terms of Service
             </Link>
           </Flex>
-        </Flex>
+        </footer>
       </Container>
-    </Box>
+    </main>
   );
 }
