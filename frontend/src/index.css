@@ -1,3 +1,5 @@
+@import "@radix-ui/themes/styles.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -5,8 +7,16 @@
 :root {
   color: #171716;
   background:
-    radial-gradient(circle at top left, rgba(41, 92, 72, 0.06), transparent 24%),
-    radial-gradient(circle at 85% 14%, rgba(149, 100, 0, 0.05), transparent 20%),
+    radial-gradient(
+      circle at top left,
+      rgba(41, 92, 72, 0.06),
+      transparent 24%
+    ),
+    radial-gradient(
+      circle at 85% 14%,
+      rgba(149, 100, 0, 0.05),
+      transparent 20%
+    ),
     #fbfaf7;
 }
 
@@ -25,8 +35,14 @@ body::before {
   pointer-events: none;
   background-image:
     linear-gradient(rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0.65)),
-    radial-gradient(circle at 1px 1px, rgba(23, 23, 22, 0.035) 1px, transparent 0);
-  background-size: 100% 100%, 14px 14px;
+    radial-gradient(
+      circle at 1px 1px,
+      rgba(23, 23, 22, 0.035) 1px,
+      transparent 0
+    );
+  background-size:
+    100% 100%,
+    14px 14px;
   opacity: 0.34;
   z-index: -1;
 }
@@ -36,7 +52,7 @@ body::before {
 }
 
 .skip-link {
-  @apply absolute left-4 top-4 z-30 -translate-y-16 rounded-md border border-line bg-surface px-4 py-2 text-sm font-medium text-ink transition focus:translate-y-0;
+  @apply absolute left-4 top-4 z-30 -translate-y-16 rounded-none border border-line bg-surface px-4 py-2 text-sm font-medium text-ink transition focus:translate-y-0;
 }
 
 .page-shell {
@@ -44,12 +60,12 @@ body::before {
 }
 
 .surface {
-  @apply rounded-xl border border-line bg-surface shadow-panel;
+  @apply rounded-none border border-line bg-surface shadow-panel;
   background-color: rgba(255, 255, 255, 0.92);
 }
 
 .surface-muted {
-  @apply rounded-xl border border-line;
+  @apply rounded-none border border-line;
   background-color: rgba(247, 246, 242, 0.85);
 }
 
@@ -62,7 +78,7 @@ body::before {
 }
 
 .field {
-  @apply w-full rounded-lg border border-line bg-white px-4 py-3 text-sm text-ink outline-none transition duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] focus:border-accent;
+  @apply w-full rounded-none border border-line bg-white px-4 py-3 text-sm text-ink outline-none transition duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] focus:border-accent;
   box-shadow: none;
 }
 
@@ -83,11 +99,11 @@ body::before {
 }
 
 .button-primary {
-  @apply inline-flex items-center justify-center gap-2 rounded-md bg-ink px-4 py-2.5 text-sm font-medium text-white transition duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-[#2c2c2b] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60;
+  @apply inline-flex items-center justify-center gap-2 rounded-none bg-ink px-4 py-2.5 text-sm font-medium text-white transition duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-[#2c2c2b] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60;
 }
 
 .button-secondary {
-  @apply inline-flex items-center justify-center gap-2 rounded-md border border-line bg-white px-4 py-2.5 text-sm font-medium text-ink transition duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60;
+  @apply inline-flex items-center justify-center gap-2 rounded-none border border-line bg-white px-4 py-2.5 text-sm font-medium text-ink transition duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60;
 }
 
 .button-secondary:hover {
@@ -100,7 +116,7 @@ body::before {
 }
 
 .toggle-row {
-  @apply flex items-start gap-3 rounded-lg border border-line px-4 py-3 text-sm;
+  @apply flex items-start gap-3 rounded-none border border-line px-4 py-3 text-sm;
   background-color: rgba(247, 246, 242, 0.75);
 }
 
@@ -138,7 +154,7 @@ body::before {
 }
 
 .skeleton {
-  @apply relative overflow-hidden rounded-lg bg-[#f0ede7];
+  @apply relative overflow-hidden rounded-none bg-[#f0ede7];
 }
 
 .skeleton::after {
@@ -146,7 +162,12 @@ body::before {
   position: absolute;
   inset: 0;
   transform: translateX(-100%);
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.72), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.72),
+    transparent
+  );
   animation: shimmer 1.5s infinite;
 }
 

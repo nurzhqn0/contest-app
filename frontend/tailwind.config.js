@@ -22,6 +22,17 @@ export default {
       },
       boxShadow: {
         panel: "0 1px 0 rgba(23, 23, 22, 0.03), 0 18px 40px -30px rgba(23, 23, 22, 0.18)"
+      },
+      borderRadius: {
+        none: '0px',
+        xs: '0px',
+        sm: '0px',
+        DEFAULT: '0px',
+        md: '0px',
+        lg: '0px',
+        xl: '0px',
+        '2xl': '0px',
+        '3xl': '0px'
       }
     }
   },
