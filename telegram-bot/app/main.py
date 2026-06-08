@@ -346,21 +346,88 @@ async def cancel(update: Update, _context: ContextTypes.DEFAULT_TYPE) -> int:
 
 
 async def help_command(update: Update, _context: ContextTypes.DEFAULT_TYPE) -> None:
+    username = update.effective_user.username
+    is_superuser = username and username.lower() == settings.superuser_username.lower()
+
+    help_text = (
+        "Commands:\n"
+        "/start - join a room or add another room\n"
+        "/room - show your rooms and the current room\n"
+        "/use ROOMCODE - switch the current room\n"
+        "/tasks - submit today's tasks\n"
+        "/edit - edit today's tasks before the deadline\n"
+        "/result - show today's saved result\n"
+        "/rank - show your current rank\n"
+        "/menu - show the main action buttons\n"
+        "/help - show this help message"
+    )
+    if is_superuser:
+        help_text += "\n\nSuperuser Commands:\n/broadcast <message> - send a message to all registered users"
+
     await _reply(
         update,
-        (
-            "Commands:\n"
-            "/start - join a room or add another room\n"
-            "/room - show your rooms and the current room\n"
-            "/use ROOMCODE - switch the current room\n"
-            "/tasks - submit today's tasks\n"
-            "/edit - edit today's tasks before the deadline\n"
-            "/result - show today's saved result\n"
-            "/rank - show your current rank\n"
-            "/menu - show the main action buttons\n"
-            "/help - show this help message"
-        ),
+        help_text,
         reply_markup=_main_menu_keyboard(),
+    )
+
+
+async def broadcast_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    username = update.effective_user.username
+    if not username or username.lower() != settings.superuser_username.lower():
+        await _reply(update, "You are not authorized to use this command.")
+        return
+
+    replied_message = update.message.reply_to_message
+
+    if replied_message:
+        from_chat_id = replied_message.chat_id
+        message_id = replied_message.message_id
+        is_reply = True
+    else:
+        if not context.args:
+            await _reply(
+                update,
+                (
+                    "Usage:\n"
+                    "• Send `/broadcast <text>` to broadcast a text message.\n"
+                    "• Reply to any message (including photos, videos, or formatted text) with `/broadcast` to broadcast it."
+                )
+            )
+            return
+        message_text = " ".join(context.args)
+        is_reply = False
+
+    status_message = await update.message.reply_text("Starting broadcast to all users...")
+
+    try:
+        telegram_ids = await backend_request("GET", "/bot/students/telegram-ids")
+    except Exception as exc:
+        await status_message.edit_text(f"Failed to fetch telegram IDs from backend: {exc}")
+        return
+
+    success_count = 0
+    failure_count = 0
+
+    for tg_id in telegram_ids:
+        try:
+            if is_reply:
+                await context.bot.copy_message(
+                    chat_id=int(tg_id),
+                    from_chat_id=from_chat_id,
+                    message_id=message_id
+                )
+            else:
+                await context.bot.send_message(chat_id=int(tg_id), text=message_text)
+            success_count += 1
+        except Exception as e:
+            logger.error(f"Failed to send broadcast to {tg_id}: {e}")
+            failure_count += 1
+        await asyncio.sleep(0.05)
+
+    await status_message.edit_text(
+        f"Broadcast completed!\n"
+        f"Successfully sent to {success_count} users.\n"
+        f"Failed for {failure_count} users."
     )
 
 
@@ -844,6 +911,7 @@ def build_application() -> Application:
     application.add_handler(CommandHandler("rank", rank_command))
     application.add_handler(CommandHandler("menu", menu_command))
     application.add_handler(CommandHandler("help", help_command))
+    application.add_handler(CommandHandler("broadcast", broadcast_command))
     application.add_handler(MessageHandler(filters.Regex(f"^{BUTTON_MY_ROOMS}$"), room_command))
     application.add_handler(MessageHandler(filters.Regex(f"^{BUTTON_TODAY_RESULT}$"), result_command))
     application.add_handler(MessageHandler(filters.Regex(f"^{BUTTON_MY_RANK}$"), rank_command))

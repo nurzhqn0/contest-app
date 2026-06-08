@@ -251,7 +251,7 @@ If your VPS already has another host config, make sure each site has its own `se
 Run Certbot:
 
 ```bash
-sudo certbot --nginx -d your-domain.com -d www.your-domain.com
+§
 ```
 
 Subdomain example:
