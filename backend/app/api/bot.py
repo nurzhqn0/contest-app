@@ -261,3 +261,15 @@ def update_notification_delivery(
         raise HTTPException(status_code=404, detail="Notification not found")
     updated = mark_notification_delivery(db, notification, payload.status, payload.error_message)
     return {"notification_id": updated.id, "status": updated.status.value}
+
+
+@router.get("/students/telegram-ids", response_model=list[str])
+def get_all_telegram_ids(db: Session = Depends(get_db)) -> list[str]:
+    # Return all unique non-null telegram IDs of students who registered via telegram
+    ids = db.scalars(
+        select(Student.telegram_id)
+        .where(Student.telegram_id.is_not(None))
+        .distinct()
+    ).all()
+    return [str(i) for i in ids if i]
+
