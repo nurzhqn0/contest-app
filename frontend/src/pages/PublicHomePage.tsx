@@ -7,7 +7,7 @@ import {
   UserGear,
   Sparkle,
 } from "@phosphor-icons/react";
-import { FormEvent, useState } from "react";
+import { FormEvent, useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Box,
@@ -22,10 +22,95 @@ import {
   Badge,
 } from "@radix-ui/themes";
 
+// IndexedDB video caching helpers
+const DB_NAME = "OinaVideoCache";
+const STORE_NAME = "videos";
+const DB_VERSION = 1;
+
+function initDB(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME);
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function getCachedVideo(key: string): Promise<Blob | null> {
+  try {
+    const db = await initDB();
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(STORE_NAME, "readonly");
+      const store = transaction.objectStore(STORE_NAME);
+      const request = store.get(key);
+      request.onsuccess = () => resolve(request.result || null);
+      request.onerror = () => reject(request.error);
+    });
+  } catch (e) {
+    console.error("IndexedDB read error:", e);
+    return null;
+  }
+}
+
+async function cacheVideo(key: string, blob: Blob): Promise<void> {
+  try {
+    const db = await initDB();
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(STORE_NAME, "readwrite");
+      const store = transaction.objectStore(STORE_NAME);
+      const request = store.put(blob, key);
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
+  } catch (e) {
+    console.error("IndexedDB write error:", e);
+  }
+}
+
 export function PublicHomePage() {
   const navigate = useNavigate();
   const [roomCode, setRoomCode] = useState("");
   const [error, setError] = useState("");
+  const [videoSrc, setVideoSrc] = useState("/onboarding-demo.mp4");
+
+  useEffect(() => {
+    let objectUrl: string | null = null;
+    const videoKey = "onboarding-demo";
+
+    async function loadVideo() {
+      try {
+        const cachedBlob = await getCachedVideo(videoKey);
+        if (cachedBlob) {
+          objectUrl = URL.createObjectURL(cachedBlob);
+          setVideoSrc(objectUrl);
+        } else {
+          // Fetch from network and cache
+          const response = await fetch("/onboarding-demo.mp4");
+          if (response.ok) {
+            const blob = await response.blob();
+            await cacheVideo(videoKey, blob);
+            objectUrl = URL.createObjectURL(blob);
+            setVideoSrc(objectUrl);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load or cache video:", error);
+      }
+    }
+
+    loadVideo();
+
+    return () => {
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
+  }, []);
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -267,13 +352,12 @@ export function PublicHomePage() {
                 {/* Video Player */}
                 <Box className="flex-1 w-full h-full bg-[#000] relative overflow-hidden flex items-center justify-center">
                   <video
-                    src="/onboarding-demo.mp4"
+                    src={videoSrc}
                     autoPlay
                     loop
                     muted
                     playsInline
-                    controls
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover pointer-events-none"
                   />
                 </Box>
 
