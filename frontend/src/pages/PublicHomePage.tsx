@@ -55,7 +55,7 @@ export function PublicHomePage() {
 
       <Container size="4" className="relative z-10 px-4">
         {/* Top Header / Branding */}
-        <header className="flex justify-between items-center mb-12 md:mb-20 pb-4 border-b border-line/40">
+        <header className="flex justify-between items-center mb-6 pb-4 border-b border-line/40">
           <Flex align="center" gap="3">
             <Box className="flex h-10 w-10 items-center justify-center rounded-none bg-accent text-white shadow-md">
               <Sparkle size={20} weight="fill" aria-hidden="true" />
@@ -64,9 +64,9 @@ export function PublicHomePage() {
               <Text
                 size="4"
                 weight="bold"
-                className="tracking-tight text-ink font-bold block"
+                className="tracking-tight text-ink font-bold block faculty-glyphic-regular"
               >
-                Oina.io
+                oina.io
               </Text>
               <Text
                 size="1"
@@ -87,14 +87,15 @@ export function PublicHomePage() {
           >
             <Link to="/login">
               <UserGear size={16} aria-hidden="true" />
-              Organizer sign-in
+              <span className="hidden xs:inline">Organizer sign-in</span>
+              <span className="inline xs:hidden">Sign-in</span>
             </Link>
           </Button>
         </header>
 
         {/* Hero Grid Section */}
         <Grid
-          columns={{ initial: "1", lg: "1.15fr 0.85fr" }}
+          columns={{ initial: "1", md: "1.15fr 0.85fr" }}
           gap="8"
           align="center"
           className="mb-20"
@@ -103,11 +104,16 @@ export function PublicHomePage() {
           <Flex
             direction="column"
             gap="6"
-            align="start"
+            align={{ initial: "center", md: "start" }}
             justify="center"
-            className="h-full"
+            className="h-full w-full"
           >
-            <Flex direction="column" gap="4" align="start">
+            <Flex
+              direction="column"
+              gap="4"
+              align={{ initial: "center", md: "start" }}
+              className="w-full"
+            >
               <Badge
                 size="2"
                 color="teal"
@@ -122,19 +128,18 @@ export function PublicHomePage() {
                 as="h1"
                 size="8"
                 weight="bold"
-                className="tracking-tight font-display text-gradient-primary"
+                className="tracking-tight font-display text-ink text-center md:text-left"
                 style={{
                   lineHeight: 1.15,
                   fontSize: "clamp(2.2rem, 4.5vw, 3.2rem)",
                 }}
               >
-                Build consistency. <br />
-                Climb the leaderboard.
+                Build consistency. <br /> Climb the leaderboard.
               </Heading>
 
               <Text
                 size="3"
-                className="text-muted leading-relaxed max-w-[46ch]"
+                className="text-muted leading-relaxed max-w-[46ch] text-center md:text-left"
               >
                 Track your habits, log daily targets, and stay accountable with
                 your group. Connect through our Telegram bot, complete
@@ -145,7 +150,7 @@ export function PublicHomePage() {
             {/* Access Form Card */}
             <Card
               size="3"
-              className="w-full max-w-[400px] p-6 bg-white border border-line shadow-sm rounded-none mt-2"
+              className="w-full md:w-3/4 p-6 bg-white border border-line shadow-sm rounded-none mt-2"
             >
               <Flex direction="column" gap="4">
                 <Box className="space-y-1">
@@ -194,7 +199,7 @@ export function PublicHomePage() {
                         if (error) setError("");
                       }}
                       radius="none"
-                      className="w-full font-mono text-center tracking-[0.25em] uppercase [&>input]:text-center [&>input]:text-xl [&>input]:font-bold [&>input]:h-12 border-line focus-within:border-accent"
+                      className="w-full h-full font-mono text-center tracking-[0.25em] uppercase [&>input]:text-center [&>input]:text-xl [&>input]:font-bold [&>input]:h-12 border-line focus-within:border-accent"
                     />
                     {error && (
                       <Text size="1" color="red" weight="medium">
@@ -225,18 +230,42 @@ export function PublicHomePage() {
             direction="column"
             className="w-full"
           >
-            {/* iPhone 15 Pro Frame */}
+            {/* iPhone 13 Frame */}
             <Box
-              className="relative w-[260px] h-[520px] bg-[#1f1f1f] p-[10px] border-[3px] border-[#3d3d3d] shadow-2xl overflow-hidden"
-              style={{ borderRadius: "40px" }}
+              className="relative w-full max-w-[300px] aspect-[9/18.5] bg-black p-[9px] border-[4px] border-[#3a3a3c] shadow-2xl mx-auto"
+              style={{ borderRadius: "48px" }}
             >
+              {/* Side button protrusions */}
+              <Box className="absolute -left-[4px] top-[75px] w-[3px] h-[15px] bg-[#3a3a3c] rounded-l-sm" />
+              <Box className="absolute -left-[4px] top-[105px] w-[3px] h-[30px] bg-[#3a3a3c] rounded-l-sm" />
+              <Box className="absolute -left-[4px] top-[145px] w-[3px] h-[30px] bg-[#3a3a3c] rounded-l-sm" />
+              <Box className="absolute -right-[4px] top-[120px] w-[3px] h-[45px] bg-[#3a3a3c] rounded-r-sm" />
+
               {/* Screen Area */}
               <Box
-                className="relative w-full h-full bg-[#111] overflow-hidden flex flex-col"
-                style={{ borderRadius: "30px" }}
+                className="relative w-full h-full bg-[#09090b] overflow-hidden flex flex-col border-black"
+                style={{ borderRadius: "37px" }}
               >
+                {/* iPhone 13 Notch (inside the screen) */}
+                <Box
+                  className="absolute top-0 left-1/2 -translate-x-1/2 w-[76px] h-[18px] bg-black z-50 flex items-center justify-between px-[6px]"
+                  style={{
+                    borderBottomLeftRadius: "11px",
+                    borderBottomRightRadius: "11px",
+                  }}
+                >
+                  {/* Sensors & Camera Lens */}
+                  <Box className="w-[5px] h-[5px] bg-[#080b12] rounded-full opacity-60" />
+                  <Box className="w-[6px] h-[6px] bg-[#0c1033] rounded-full border border-white/5 relative flex items-center justify-center">
+                    <Box className="w-[2px] h-[2px] bg-[#1a3a60] rounded-full" />
+                  </Box>
+                </Box>
+
+                {/* Subtle glass reflection overlay */}
+                <Box className="absolute inset-0 pointer-events-none bg-gradient-to-tr from-transparent via-white/5 to-transparent z-40" />
+
                 {/* Video Player */}
-                <Box className="flex-1 w-full h-full flex items-center justify-center bg-accent/95 relative">
+                <Box className="flex-1 w-full h-full bg-[#000] relative overflow-hidden flex items-center justify-center">
                   <video
                     src="/onboarding-demo.mp4"
                     autoPlay
@@ -247,6 +276,15 @@ export function PublicHomePage() {
                     className="w-full h-full object-cover"
                   />
                 </Box>
+
+                {/* Home Indicator Overlay */}
+                <Flex
+                  align="center"
+                  justify="center"
+                  className="absolute bottom-0 left-0 right-0 h-[15px] bg-gradient-to-t from-black/30 to-transparent z-40 pointer-events-none"
+                >
+                  <Box className="w-[90px] h-[4px] bg-white/85 rounded-full" />
+                </Flex>
               </Box>
             </Box>
 
@@ -273,7 +311,7 @@ export function PublicHomePage() {
             direction="column"
             align="center"
             gap="2"
-            className="mb-12 text-center"
+            className="text-center mb-12"
           >
             <Badge
               size="1"
@@ -408,7 +446,7 @@ export function PublicHomePage() {
         {/* Feature Grid Block */}
         <Box className="mb-20 py-12 px-6 bg-accentSoft/30 border border-accentSoft">
           <Grid
-            columns={{ initial: "1", lg: "0.8fr 1.2fr" }}
+            columns={{ initial: "1", md: "0.8fr 1.2fr" }}
             gap="6"
             align="center"
           >
@@ -624,7 +662,17 @@ export function PublicHomePage() {
 
         {/* Premium Footer */}
         <footer className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-8 border-t border-line/60 text-xs text-muted">
-          <Text>© 2026 Oina.io. Built for modern student challenges.</Text>
+          <Text>
+            © 2026 oina.io.{" "}
+            <a
+              className="underline"
+              href="https://github.com/nurzhqn0"
+              target="_blank"
+            >
+              nurzhqn0
+            </a>
+            .
+          </Text>
           <Flex gap="4">
             <Link
               to="/privacy"
