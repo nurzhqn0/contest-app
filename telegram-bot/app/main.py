@@ -740,7 +740,6 @@ async def tasks_answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
                 "",
                 f'Day total: {result["day_points"]}',
                 f'Total score: {result["total_points"]}',
-                f'Your place: {result["rank"]} of {result["total_students"]}',
                 "",
                 f'If you notice a mistake before {result["deadline"]}, use /edit or tap "{BUTTON_EDIT_TASKS}".',
             ]
@@ -796,7 +795,6 @@ async def rank_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     await _reply(
         update,
         (
-            f'Your place: {result["position"]} of {result["total_students"]}\n'
             f'Total score: {result["total_points"]}\n'
             f'Points today: {result["today_points"]}'
         ),
