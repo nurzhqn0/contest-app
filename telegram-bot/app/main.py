@@ -667,7 +667,7 @@ async def edit_answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
         context,
         intro_text=(
             f'Saved "{task["name"]}" as "{normalized_answer}".\n'
-            f'Current total: {result["total_points"]} points, place {result["rank"]} of {result["total_students"]}.'
+            f'Current total: {result["total_points"]} points.'
         ),
     )
     return EDIT_SELECT
@@ -776,7 +776,6 @@ async def result_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             "",
             f'Points today: {result["day_points"]}',
             f'Total score: {result["total_points"]}',
-            f'Place: {result["rank"]} of {result["total_students"]}',
             "",
             f'Use /edit before {result["deadline"]} if you need to correct something.',
         ]
