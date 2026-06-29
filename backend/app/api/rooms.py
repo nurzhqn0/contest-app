@@ -10,6 +10,7 @@ from app.models.entities import Completion, Punishment, Room, Student, Task
 from app.schemas.common import (
     LeaderboardRow,
     ProgressRow,
+    RoomAnalyticsResponse,
     PunishmentCreate,
     PunishmentResponse,
     PunishmentUpdate,
@@ -23,6 +24,7 @@ from app.schemas.common import (
     TaskResponse,
     TaskUpdate,
 )
+from app.services.analytics import build_room_analytics
 from app.services.codegen import generate_room_code
 from app.services.exporter import export_room_to_workbook
 from app.services.scoring import build_bonus_maps, build_leaderboard, build_progress_rows
@@ -281,6 +283,16 @@ def room_progress(
 ) -> list[ProgressRow]:
     room = _get_room_or_404(db, room_id)
     return build_progress_rows(db, room, progress_date or date.today(), respect_visibility=False)
+
+
+@router.get("/{room_id}/analytics", response_model=RoomAnalyticsResponse)
+def room_analytics(
+    room_id: int,
+    db: Session = Depends(get_db),
+    _current_organizer=Depends(get_current_organizer),
+) -> RoomAnalyticsResponse:
+    room = _get_room_or_404(db, room_id)
+    return build_room_analytics(db, room)
 
 
 @router.get("/{room_id}/punishments", response_model=list[PunishmentResponse])

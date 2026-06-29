@@ -123,3 +123,14 @@ export function formatProgressAnswers(answers: Record<string, string>) {
 export function scoreText(row: Pick<LeaderboardRow, "score_visible" | "total_points">) {
   return row.score_visible ? `${row.total_points} pts` : "Hidden";
 }
+
+export function formatPercent(value: number) {
+  return `${Math.round(value * 1000) / 10}%`;
+}
+
+export function formatMetric(value: number | null) {
+  if (value == null) {
+    return "—";
+  }
+  return `${Math.round(value * 100) / 100}`;
+}

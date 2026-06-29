@@ -26,7 +26,9 @@ import {
   formatDate,
   formatDateTime,
   formatLeaderboardVisibility,
+  formatMetric,
   formatNameVisibility,
+  formatPercent,
   formatProgressAnswers,
   formatPunishmentStatus,
   formatRoomStatus,
@@ -41,6 +43,7 @@ import {
   ProgressRow,
   Punishment,
   Room,
+  RoomAnalytics,
   Student,
   Task,
 } from "../lib/types";
@@ -75,6 +78,14 @@ type PunishmentFormState = {
   reason: string;
   status: Punishment["status"];
 };
+
+type TabKey =
+  | "settings"
+  | "tasks"
+  | "students"
+  | "leaderboard"
+  | "penalties"
+  | "analytics";
 
 const emptyTaskForm = (): TaskFormState => ({
   id: null,
@@ -131,6 +142,7 @@ export function RoomPage() {
     useState<StudentFormState>(emptyStudentForm);
   const [punishmentForm, setPunishmentForm] =
     useState<PunishmentFormState>(emptyPunishmentForm);
+  const [activeTab, setActiveTab] = useState<TabKey>("settings");
 
   const roomQuery = useQuery({
     queryKey: ["room", numericRoomId],
@@ -172,6 +184,12 @@ export function RoomPage() {
     enabled: Number.isFinite(numericRoomId),
   });
 
+  const analyticsQuery = useQuery({
+    queryKey: ["analytics", numericRoomId],
+    queryFn: () => api.get<RoomAnalytics>(`/rooms/${numericRoomId}/analytics`),
+    enabled: Number.isFinite(numericRoomId),
+  });
+
   useEffect(() => {
     if (roomQuery.data) {
       setRoomForm(roomQuery.data);
@@ -194,6 +212,7 @@ export function RoomPage() {
       queryClient.invalidateQueries({
         queryKey: ["punishments", numericRoomId],
       });
+      queryClient.invalidateQueries({ queryKey: ["analytics", numericRoomId] });
     };
     return () => socket.close();
   }, [numericRoomId, queryClient]);
@@ -205,6 +224,7 @@ export function RoomPage() {
     queryClient.invalidateQueries({ queryKey: ["leaderboard", numericRoomId] });
     queryClient.invalidateQueries({ queryKey: ["progress", numericRoomId] });
     queryClient.invalidateQueries({ queryKey: ["punishments", numericRoomId] });
+    queryClient.invalidateQueries({ queryKey: ["analytics", numericRoomId] });
     queryClient.invalidateQueries({ queryKey: ["rooms"] });
     queryClient.invalidateQueries({ queryKey: ["dashboard"] });
   };
@@ -325,6 +345,19 @@ export function RoomPage() {
   const leaderboard = leaderboardQuery.data ?? [];
   const progress = progressQuery.data ?? [];
   const punishments = punishmentsQuery.data ?? [];
+  const analytics = analyticsQuery.data ?? null;
+  const numericTaskColumns = useMemo(() => {
+    if (!analytics) {
+      return [];
+    }
+    const nameById = new Map(
+      analytics.tasks.map((task) => [task.task_id, task.task_name]),
+    );
+    return analytics.breakdown_task_ids.map((taskId) => ({
+      taskId,
+      name: nameById.get(taskId) ?? `#${taskId}`,
+    }));
+  }, [analytics]);
   const studentNameMap = useMemo(
     () =>
       Object.fromEntries(students.map((student) => [student.id, student.name])),
@@ -334,6 +367,14 @@ export function RoomPage() {
   const pendingPunishments = punishments.filter(
     (punishment) => punishment.status === "pending",
   ).length;
+  const tabItems: { key: TabKey; label: string; count?: number }[] = [
+    { key: "settings", label: "Settings" },
+    { key: "tasks", label: "Tasks", count: tasks.length },
+    { key: "students", label: "Participants", count: students.length },
+    { key: "leaderboard", label: "Leaderboard" },
+    { key: "penalties", label: "Penalties", count: punishments.length },
+    { key: "analytics", label: "Analytics" },
+  ];
 
   function handleSaveRoom() {
     saveRoomMutation.mutate();
@@ -502,6 +543,33 @@ export function RoomPage() {
         </div>
       </section>
 
+      <div
+        className="surface reveal p-2"
+        style={{ ["--index" as string]: 1 }}
+      >
+        <nav
+          className="flex flex-wrap gap-2"
+          aria-label="Room sections"
+        >
+          {tabItems.map((tab) => (
+            <button
+              key={tab.key}
+              type="button"
+              onClick={() => setActiveTab(tab.key)}
+              className={`rounded-none px-4 py-2 text-sm font-medium transition duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                activeTab === tab.key
+                  ? "bg-ink text-white"
+                  : "border border-line bg-white text-ink hover:border-accent/35 hover:bg-accentSoft/35"
+              }`}
+            >
+              {tab.label}
+              {typeof tab.count === "number" ? ` (${tab.count})` : ""}
+            </button>
+          ))}
+        </nav>
+      </div>
+
+      {activeTab === "settings" && (
       <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
         <SectionCard
           title="Room settings"
@@ -860,7 +928,9 @@ export function RoomPage() {
           </div>
         </SectionCard>
       </div>
+      )}
 
+      {activeTab === "tasks" && (
       <SectionCard
         title="Tasks"
         eyebrow={taskForm.id ? "Edit task" : "Create task"}
@@ -1135,7 +1205,9 @@ export function RoomPage() {
           )}
         </div>
       </SectionCard>
+      )}
 
+      {activeTab === "students" && (
       <SectionCard
         title="Students"
         eyebrow={studentForm.id ? "Edit student" : "Create student"}
@@ -1358,8 +1430,9 @@ export function RoomPage() {
           )}
         </div>
       </SectionCard>
+      )}
 
-      <div className="grid gap-6 xl:grid-cols-[0.92fr_1.08fr]">
+      {activeTab === "leaderboard" && (
         <SectionCard
           title="Leaderboard"
           eyebrow="Live ranking"
@@ -1418,7 +1491,9 @@ export function RoomPage() {
             />
           )}
         </SectionCard>
+      )}
 
+      {activeTab === "penalties" && (
         <SectionCard
           className="overflow-x-auto"
           title="Penalties"
@@ -1608,8 +1683,9 @@ export function RoomPage() {
             )}
           </div>
         </SectionCard>
-      </div>
+      )}
 
+      {activeTab === "leaderboard" && (
       <SectionCard
         title="Daily progress"
         eyebrow="Progress by date"
@@ -1667,6 +1743,178 @@ export function RoomPage() {
           />
         )}
       </SectionCard>
+      )}
+
+      {activeTab === "analytics" && (
+      <SectionCard
+        title="Analytics"
+        eyebrow="Aggregate stats"
+        description="Totals, averages, and consistency metrics computed across every submission in this room."
+        action={
+          analytics ? (
+            <StatusBadge
+              label={`${analytics.total_distinct_days} active days`}
+              tone="info"
+            />
+          ) : null
+        }
+      >
+        {analyticsQuery.isLoading ? (
+          <div className="space-y-3">
+            <SkeletonBlock className="h-10 w-full" />
+            <SkeletonBlock className="h-10 w-full" />
+            <SkeletonBlock className="h-10 w-full" />
+          </div>
+        ) : analytics && analytics.tasks.length ? (
+          <div className="space-y-8">
+            <div className="space-y-3">
+              <div className="eyebrow">Per task</div>
+              <div className="overflow-x-auto">
+                <table className="grid-table min-w-full">
+                  <thead>
+                    <tr>
+                      <th>Task</th>
+                      <th>Type</th>
+                      <th>Submissions</th>
+                      <th>Completion</th>
+                      <th>Yes</th>
+                      <th>Total</th>
+                      <th>Average</th>
+                      <th>Maximum</th>
+                      <th>Minimum</th>
+                      <th>Median</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {analytics.tasks.map((row) => (
+                      <tr key={row.task_id}>
+                        <td className="font-medium text-ink">{row.task_name}</td>
+                        <td>{formatTaskType(row.task_type)}</td>
+                        <td className="mono-data">{row.submissions}</td>
+                        <td className="mono-data">
+                          {formatPercent(row.completion_rate)}
+                        </td>
+                        <td className="mono-data">
+                          {row.yes_count == null ? "—" : row.yes_count}
+                        </td>
+                        <td className="mono-data">{formatMetric(row.total)}</td>
+                        <td className="mono-data">
+                          {formatMetric(row.average)}
+                        </td>
+                        <td className="mono-data">
+                          {formatMetric(row.maximum)}
+                        </td>
+                        <td className="mono-data">
+                          {formatMetric(row.minimum)}
+                        </td>
+                        <td className="mono-data">{formatMetric(row.median)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <div className="eyebrow">Per student</div>
+              {analytics.students.length ? (
+                <div className="overflow-x-auto">
+                  <table className="grid-table min-w-full">
+                    <thead>
+                      <tr>
+                        <th>Student</th>
+                        <th>Days participated</th>
+                        <th>Longest streak</th>
+                        <th>Best entry</th>
+                        {numericTaskColumns.map((column) => (
+                          <th key={column.taskId}>{column.name}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {analytics.students.map((row) => {
+                        const totalById = new Map(
+                          row.per_task_totals.map((item) => [
+                            item.task_id,
+                            item.total,
+                          ]),
+                        );
+                        return (
+                          <tr key={row.student_id}>
+                            <td className="font-medium text-ink">
+                              {row.student_name}
+                            </td>
+                            <td className="mono-data">
+                              {row.days_participated}
+                            </td>
+                            <td className="mono-data">{row.longest_streak}</td>
+                            <td className="mono-data">
+                              {formatMetric(row.best_entry)}
+                            </td>
+                            {numericTaskColumns.map((column) => (
+                              <td key={column.taskId} className="mono-data">
+                                {formatMetric(
+                                  totalById.get(column.taskId) ?? 0,
+                                )}
+                              </td>
+                            ))}
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <EmptyState
+                  icon={UsersThree}
+                  title="No students yet"
+                  description="Per-student analytics appear after participants join the room."
+                  compact
+                />
+              )}
+            </div>
+
+            <div className="space-y-3">
+              <div className="eyebrow">Daily participation</div>
+              {analytics.daily_participation.length ? (
+                <div className="overflow-x-auto">
+                  <table className="grid-table min-w-full">
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Active students</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {analytics.daily_participation.map((row) => (
+                        <tr key={row.date}>
+                          <td>{formatDate(row.date)}</td>
+                          <td className="mono-data">{row.active_students}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <EmptyState
+                  icon={ClockCountdown}
+                  title="No participation data yet"
+                  description="Daily participation appears after the first submissions land."
+                  compact
+                />
+              )}
+            </div>
+          </div>
+        ) : (
+          <EmptyState
+            icon={ChartBar}
+            title="No analytics yet"
+            description="Add tasks and collect submissions to see totals, averages, and consistency metrics."
+            compact
+          />
+        )}
+      </SectionCard>
+      )}
     </div>
   );
 }
