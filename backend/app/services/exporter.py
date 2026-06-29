@@ -8,6 +8,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.models.entities import Completion, Punishment, Room, Student, Task
+from app.services.analytics import build_room_analytics
 from app.services.scoring import build_bonus_maps, build_leaderboard
 
 
@@ -171,6 +172,55 @@ def export_room_to_workbook(
                     punishment.status.value,
                 ]
             )
+
+    if not leaderboard_only and not progress_only:
+        analytics = build_room_analytics(db, room)
+        task_name_map = {task.id: task.name for task in visible_tasks}
+
+        task_analytics_sheet = workbook.create_sheet("Task Analytics")
+        task_analytics_sheet.append(
+            ["Task", "Type", "Submissions", "Completion %", "Yes count", "Total", "Average", "Maximum", "Minimum", "Median"]
+        )
+        _bold_row(task_analytics_sheet, 1)
+        for row in analytics.tasks:
+            task_analytics_sheet.append(
+                [
+                    row.task_name,
+                    row.task_type.value,
+                    row.submissions,
+                    round(row.completion_rate * 100, 1),
+                    row.yes_count if row.yes_count is not None else "",
+                    row.total if row.total is not None else "",
+                    round(row.average, 2) if row.average is not None else "",
+                    row.maximum if row.maximum is not None else "",
+                    row.minimum if row.minimum is not None else "",
+                    row.median if row.median is not None else "",
+                ]
+            )
+
+        student_analytics_sheet = workbook.create_sheet("Student Analytics")
+        breakdown_task_names = [task_name_map.get(task_id, str(task_id)) for task_id in analytics.breakdown_task_ids]
+        student_analytics_sheet.append(
+            ["Student", "Days participated", "Longest streak", "Best entry", *breakdown_task_names]
+        )
+        _bold_row(student_analytics_sheet, 1)
+        for row in analytics.students:
+            totals = {item.task_id: item.total for item in row.per_task_totals}
+            student_analytics_sheet.append(
+                [
+                    row.student_name,
+                    row.days_participated,
+                    row.longest_streak,
+                    row.best_entry if row.best_entry is not None else "",
+                    *[totals.get(task_id, 0) for task_id in analytics.breakdown_task_ids],
+                ]
+            )
+
+        daily_participation_sheet = workbook.create_sheet("Daily Participation")
+        daily_participation_sheet.append(["Date", "Active students"])
+        _bold_row(daily_participation_sheet, 1)
+        for row in analytics.daily_participation:
+            daily_participation_sheet.append([row.date.isoformat(), row.active_students])
 
     output = BytesIO()
     workbook.save(output)

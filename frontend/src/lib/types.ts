@@ -103,6 +103,49 @@ export interface Punishment {
   completed_at?: string | null;
 }
 
+export interface TaskAnalytics {
+  task_id: number;
+  task_name: string;
+  task_type: TaskType;
+  is_numeric: boolean;
+  submissions: number;
+  completion_rate: number;
+  yes_count: number | null;
+  total: number | null;
+  average: number | null;
+  maximum: number | null;
+  minimum: number | null;
+  median: number | null;
+}
+
+export interface StudentTaskTotal {
+  task_id: number;
+  total: number;
+}
+
+export interface StudentAnalytics {
+  student_id: number;
+  student_name: string;
+  days_participated: number;
+  longest_streak: number;
+  best_entry: number | null;
+  per_task_totals: StudentTaskTotal[];
+}
+
+export interface DailyParticipation {
+  date: string;
+  active_students: number;
+}
+
+export interface RoomAnalytics {
+  total_distinct_days: number;
+  numeric_task_ids: number[];
+  breakdown_task_ids: number[];
+  tasks: TaskAnalytics[];
+  students: StudentAnalytics[];
+  daily_participation: DailyParticipation[];
+}
+
 export interface PublicRoom {
   id: number;
   name: string;

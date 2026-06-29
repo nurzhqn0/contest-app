@@ -212,6 +212,49 @@ class PunishmentResponse(PunishmentBase):
     completed_at: datetime | None
 
 
+class TaskAnalytics(BaseModel):
+    task_id: int
+    task_name: str
+    task_type: TaskType
+    is_numeric: bool
+    submissions: int
+    completion_rate: float
+    yes_count: int | None = None
+    total: float | None = None
+    average: float | None = None
+    maximum: float | None = None
+    minimum: float | None = None
+    median: float | None = None
+
+
+class StudentTaskTotal(BaseModel):
+    task_id: int
+    total: float
+
+
+class StudentAnalytics(BaseModel):
+    student_id: int
+    student_name: str
+    days_participated: int
+    longest_streak: int
+    best_entry: float | None = None
+    per_task_totals: list[StudentTaskTotal]
+
+
+class DailyParticipation(BaseModel):
+    date: dt_date
+    active_students: int
+
+
+class RoomAnalyticsResponse(BaseModel):
+    total_distinct_days: int
+    numeric_task_ids: list[int]
+    breakdown_task_ids: list[int]
+    tasks: list[TaskAnalytics]
+    students: list[StudentAnalytics]
+    daily_participation: list[DailyParticipation]
+
+
 class PublicRoomLookupRequest(BaseModel):
     room_code: str
 
