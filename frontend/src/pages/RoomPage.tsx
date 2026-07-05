@@ -143,6 +143,13 @@ export function RoomPage() {
   const [punishmentForm, setPunishmentForm] =
     useState<PunishmentFormState>(emptyPunishmentForm);
   const [activeTab, setActiveTab] = useState<TabKey>("settings");
+  const [editingProgress, setEditingProgress] = useState<{
+    studentId: number;
+    studentName: string;
+  } | null>(null);
+  const [progressAnswers, setProgressAnswers] = useState<Record<number, string>>(
+    {},
+  );
 
   const roomQuery = useQuery({
     queryKey: ["room", numericRoomId],
@@ -340,6 +347,37 @@ export function RoomPage() {
     onSuccess: refreshAll,
   });
 
+  const saveProgressMutation = useMutation({
+    mutationFn: (studentId: number) => {
+      const activeTaskList = tasks.filter((task) => task.is_active);
+      const payload = {
+        date: progressDate,
+        submitted_via: "organizer",
+        answers: activeTaskList.map((task) => ({
+          task_id: task.id,
+          value: (progressAnswers[task.id] ?? "").trim(),
+        })),
+      };
+      return api.put(
+        `/rooms/${numericRoomId}/students/${studentId}/completions`,
+        payload,
+      );
+    },
+    onSuccess: () => {
+      setEditingProgress(null);
+      setProgressAnswers({});
+      refreshAll();
+    },
+  });
+
+  const deleteProgressMutation = useMutation({
+    mutationFn: (studentId: number) =>
+      api.delete(
+        `/rooms/${numericRoomId}/students/${studentId}/completions?completion_date=${progressDate}`,
+      ),
+    onSuccess: refreshAll,
+  });
+
   const tasks = tasksQuery.data ?? [];
   const students = studentsQuery.data ?? [];
   const leaderboard = leaderboardQuery.data ?? [];
@@ -377,6 +415,39 @@ export function RoomPage() {
       return;
     }
     deleteRoomMutation.mutate();
+  }
+
+  function handleEditProgress(row: ProgressRow) {
+    const prefilled: Record<number, string> = {};
+    for (const task of tasks) {
+      if (!task.is_active) {
+        continue;
+      }
+      prefilled[task.id] = row.answers[task.name] ?? "";
+    }
+    setProgressAnswers(prefilled);
+    setEditingProgress({
+      studentId: row.student_id,
+      studentName: row.student_name,
+    });
+  }
+
+  function handleSaveProgress() {
+    if (!editingProgress) {
+      return;
+    }
+    saveProgressMutation.mutate(editingProgress.studentId);
+  }
+
+  function handleDeleteProgress(row: ProgressRow) {
+    if (
+      !window.confirm(
+        `Delete ${row.student_name}'s submission for ${progressDate}? This removes all their answers for that date.`,
+      )
+    ) {
+      return;
+    }
+    deleteProgressMutation.mutate(row.student_id);
   }
 
   function handleTaskSubmit(event: FormEvent) {
@@ -1690,6 +1761,91 @@ export function RoomPage() {
           </label>
         }
       >
+        {editingProgress && (
+          <div className="mb-6 space-y-4 rounded-xl border border-line bg-surface p-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h3 className="font-semibold">
+                Edit {editingProgress.studentName}'s answers · {progressDate}
+              </h3>
+              <button
+                className="button-tertiary"
+                onClick={() => {
+                  setEditingProgress(null);
+                  setProgressAnswers({});
+                }}
+              >
+                Close
+              </button>
+            </div>
+            <p className="text-sm text-muted">
+              Organizer override — saves regardless of the daily deadline. Points
+              recalculate automatically.
+            </p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {tasks
+                .filter((task) => task.is_active)
+                .map((task) => (
+                  <label key={task.id} className="field-label">
+                    <span className="eyebrow">
+                      {task.name} · {formatTaskType(task.type)}
+                    </span>
+                    {task.type === "yes_no" ? (
+                      <select
+                        className="field"
+                        value={progressAnswers[task.id] ?? ""}
+                        onChange={(event) =>
+                          setProgressAnswers((prev) => ({
+                            ...prev,
+                            [task.id]: event.target.value,
+                          }))
+                        }
+                      >
+                        <option value="">Not answered</option>
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
+                      </select>
+                    ) : (
+                      <input
+                        className="field mono-data"
+                        inputMode={task.type === "text" ? "text" : "decimal"}
+                        value={progressAnswers[task.id] ?? ""}
+                        onChange={(event) =>
+                          setProgressAnswers((prev) => ({
+                            ...prev,
+                            [task.id]: event.target.value,
+                          }))
+                        }
+                        placeholder="Not answered"
+                      />
+                    )}
+                  </label>
+                ))}
+            </div>
+            {saveProgressMutation.isError && (
+              <p className="rounded-lg border border-red-200 bg-redSoft px-4 py-3 text-sm text-[#9f2f2d]">
+                {(saveProgressMutation.error as Error).message}
+              </p>
+            )}
+            <div className="flex gap-2">
+              <button
+                className="button-primary"
+                onClick={handleSaveProgress}
+                disabled={saveProgressMutation.isPending}
+              >
+                {saveProgressMutation.isPending ? "Saving…" : "Save answers"}
+              </button>
+              <button
+                className="button-secondary"
+                onClick={() => {
+                  setEditingProgress(null);
+                  setProgressAnswers({});
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
         {progress.length ? (
           <div className="overflow-x-auto">
             <table className="grid-table min-w-full">
@@ -1700,6 +1856,7 @@ export function RoomPage() {
                   <th>Day score</th>
                   <th>Total score</th>
                   <th>Answers</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -1716,6 +1873,25 @@ export function RoomPage() {
                     <td className="mono-data">{row.total_points}</td>
                     <td className="copy-pretty text-sm text-muted">
                       {formatProgressAnswers(row.answers)}
+                    </td>
+                    <td>
+                      <div className="flex gap-2">
+                        <button
+                          className="button-tertiary"
+                          onClick={() => handleEditProgress(row)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="button-secondary !border-red-200 !text-[#9f2f2d]"
+                          disabled={
+                            !row.submitted || deleteProgressMutation.isPending
+                          }
+                          onClick={() => handleDeleteProgress(row)}
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

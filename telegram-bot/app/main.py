@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import math
 import time
 
 from telegram import BotCommand, KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
@@ -21,6 +22,30 @@ TASK_ANSWER = 10
 EDIT_SELECT = 11
 EDIT_ANSWER = 12
 logger = logging.getLogger(__name__)
+
+# Largest quantity a single numeric answer may hold. Must match the backend
+# MAX_QUANTITY guard in scoring.py. Anything above this is junk (e.g. a
+# thousand-digit number) that pollutes results and can overflow scores.
+MAX_QUANTITY = 1e9
+
+NUMERIC_TASK_TYPES = {"quantity", "range"}
+
+
+def _numeric_answer_error(task: dict, answer_text: str) -> str | None:
+    """Return an error message if a numeric task answer is not a sane finite number, else None."""
+    if task["type"] not in NUMERIC_TASK_TYPES:
+        return None
+    try:
+        value = float(answer_text.strip())
+    except (ValueError, OverflowError):
+        return "Please send a valid number (use a dot for decimals, e.g. 3.5)."
+    if not math.isfinite(value):
+        return "Please send a real number."
+    if task["type"] == "quantity" and value < 0:
+        return "Please send a number of 0 or more."
+    if abs(value) > MAX_QUANTITY:
+        return f"That number is too large. Maximum allowed is {int(MAX_QUANTITY):,}."
+    return None
 
 BUTTON_SUBMIT_TASKS = "Submit today's tasks"
 BUTTON_EDIT_TASKS = "Edit today's tasks"
@@ -641,6 +666,15 @@ async def edit_answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
                 )
                 return EDIT_ANSWER
             normalized_answer = "yes" if answer_text == BUTTON_YES else "no"
+        else:
+            numeric_error = _numeric_answer_error(task, answer_text)
+            if numeric_error is not None:
+                await _reply(
+                    update,
+                    numeric_error,
+                    reply_markup=_task_keyboard(task, has_back=True, has_existing=task["id"] in existing_answers),
+                )
+                return EDIT_ANSWER
 
     student_id = context.user_data.get("current_student_id")
     try:
@@ -714,6 +748,15 @@ async def tasks_answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
                 )
                 return TASK_ANSWER
             normalized_answer = "yes" if answer_text == BUTTON_YES else "no"
+        else:
+            numeric_error = _numeric_answer_error(task, answer_text)
+            if numeric_error is not None:
+                await _reply(
+                    update,
+                    numeric_error,
+                    reply_markup=_task_keyboard(task, has_back=task_index > 0, has_existing=task["id"] in existing_answers),
+                )
+                return TASK_ANSWER
         answers[task["id"]] = normalized_answer
 
     context.user_data["task_answers"] = answers
