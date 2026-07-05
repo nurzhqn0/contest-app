@@ -45,6 +45,18 @@ export function AppShell() {
                 Dashboard
               </NavLink>
               <NavLink
+                to="/app/analytics"
+                className={({ isActive }) =>
+                  `rounded-md px-3 py-2 text-sm font-medium transition duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                    isActive
+                      ? "bg-ink text-white"
+                      : "border border-line bg-white text-ink hover:border-accent/35 hover:bg-accentSoft/35"
+                  }`
+                }
+              >
+                Analytics
+              </NavLink>
+              <NavLink
                 to="/"
                 className={({ isActive }) =>
                   `inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
