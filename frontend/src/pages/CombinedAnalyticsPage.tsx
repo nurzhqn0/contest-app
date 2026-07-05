@@ -8,6 +8,7 @@ import {
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import AnalyticsCharts from "../components/analytics/AnalyticsCharts";
+import CombinedCharts from "../components/analytics/CombinedCharts";
 import RoomAnalyticsTables from "../components/analytics/RoomAnalyticsTables";
 import { EmptyState } from "../components/EmptyState";
 import { SectionCard } from "../components/SectionCard";
@@ -25,6 +26,7 @@ function buildQueryString(ids: number[]) {
 export function CombinedAnalyticsPage() {
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [appliedIds, setAppliedIds] = useState<number[]>([]);
+  const [viewMode, setViewMode] = useState<"combined" | "by_room">("combined");
 
   const roomsQuery = useQuery({
     queryKey: ["rooms"],
@@ -230,7 +232,77 @@ export function CombinedAnalyticsPage() {
             />
           </div>
 
-          {data.rooms.length ? (
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              className={
+                viewMode === "combined" ? "button-primary" : "button-secondary"
+              }
+              onClick={() => setViewMode("combined")}
+            >
+              Combined
+            </button>
+            <button
+              type="button"
+              className={
+                viewMode === "by_room" ? "button-primary" : "button-secondary"
+              }
+              onClick={() => setViewMode("by_room")}
+            >
+              By room
+            </button>
+          </div>
+
+          {viewMode === "combined" ? (
+            <div className="space-y-6">
+              <CombinedCharts
+                leaderboard={data.combined_leaderboard}
+                comparison={data.room_comparison}
+                daily={data.combined_daily}
+              />
+              <SectionCard
+                title="Combined leaderboard"
+                eyebrow="Combined"
+              >
+                {data.combined_leaderboard.length ? (
+                  <div className="overflow-x-auto">
+                    <table className="grid-table min-w-full">
+                      <thead>
+                        <tr>
+                          <th>Rank</th>
+                          <th>Student</th>
+                          <th>Room</th>
+                          <th>Total pts</th>
+                          <th>Today</th>
+                          <th>Completed days</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {data.combined_leaderboard.map((row) => (
+                          <tr key={`${row.room_id}-${row.student_id}`}>
+                            <td className="mono-data">{row.position}</td>
+                            <td className="font-medium text-ink">
+                              {row.student_name}
+                            </td>
+                            <td>{row.room_name}</td>
+                            <td className="mono-data">{row.total_points}</td>
+                            <td className="mono-data">{row.today_points}</td>
+                            <td className="mono-data">{row.completed_days}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <EmptyState
+                    icon={ChartBar}
+                    title="No leaderboard data"
+                    description="The selected rooms do not have leaderboard data yet."
+                  />
+                )}
+              </SectionCard>
+            </div>
+          ) : data.rooms.length ? (
             data.rooms.map((block) => (
               <SectionCard
                 key={block.room_id}

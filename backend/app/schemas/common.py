@@ -267,9 +267,37 @@ class MultiRoomSummary(BaseModel):
     total_distinct_days: int
 
 
+class CombinedLeaderboardRow(BaseModel):
+    position: int
+    student_id: int
+    student_name: str
+    room_id: int
+    room_name: str
+    total_points: float
+    today_points: float
+    completed_days: int
+
+
+class RoomComparisonRow(BaseModel):
+    room_id: int
+    room_name: str
+    student_count: int
+    total_points: float
+    average_points: float
+
+
+class CombinedDailyStat(BaseModel):
+    date: dt_date
+    active_students: int
+    points: float
+
+
 class MultiRoomAnalyticsResponse(BaseModel):
     summary: MultiRoomSummary
     rooms: list[RoomAnalyticsBlock]
+    combined_leaderboard: list[CombinedLeaderboardRow]
+    room_comparison: list[RoomComparisonRow]
+    combined_daily: list[CombinedDailyStat]
 
 
 class PublicRoomLookupRequest(BaseModel):

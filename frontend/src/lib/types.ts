@@ -158,9 +158,37 @@ export interface MultiRoomSummary {
   total_distinct_days: number;
 }
 
+export interface CombinedLeaderboardRow {
+  position: number;
+  student_id: number;
+  student_name: string;
+  room_id: number;
+  room_name: string;
+  total_points: number;
+  today_points: number;
+  completed_days: number;
+}
+
+export interface RoomComparisonRow {
+  room_id: number;
+  room_name: string;
+  student_count: number;
+  total_points: number;
+  average_points: number;
+}
+
+export interface CombinedDailyStat {
+  date: string;
+  active_students: number;
+  points: number;
+}
+
 export interface MultiRoomAnalytics {
   summary: MultiRoomSummary;
   rooms: RoomAnalyticsBlock[];
+  combined_leaderboard: CombinedLeaderboardRow[];
+  room_comparison: RoomComparisonRow[];
+  combined_daily: CombinedDailyStat[];
 }
 
 export interface PublicRoom {
