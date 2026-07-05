@@ -8,6 +8,8 @@ from app.api.deps import get_current_organizer
 from app.db.session import get_db
 from app.models.entities import Completion, Punishment, Room, Student, Task
 from app.schemas.common import (
+    CompletionSubmitRequest,
+    DailyResultResponse,
     LeaderboardRow,
     MultiRoomAnalyticsResponse,
     ProgressRow,
@@ -28,7 +30,13 @@ from app.schemas.common import (
 from app.services.analytics import build_multi_room_analytics, build_room_analytics
 from app.services.codegen import generate_room_code
 from app.services.exporter import export_multi_room_to_workbook, export_room_to_workbook
-from app.services.scoring import build_bonus_maps, build_leaderboard, build_progress_rows
+from app.services.scoring import (
+    build_bonus_maps,
+    build_leaderboard,
+    build_progress_rows,
+    calculate_task_score,
+    get_student_daily_result,
+)
 from app.websocket.manager import room_socket_manager
 
 router = APIRouter(prefix="/rooms", tags=["rooms"])
@@ -262,6 +270,84 @@ def delete_student(
         raise HTTPException(status_code=404, detail="Student not found")
     db.delete(student)
     db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.put("/{room_id}/students/{student_id}/completions", response_model=DailyResultResponse)
+async def update_student_completions(
+    room_id: int,
+    student_id: int,
+    payload: CompletionSubmitRequest,
+    db: Session = Depends(get_db),
+    _current_organizer=Depends(get_current_organizer),
+) -> DailyResultResponse:
+    """Organizer override: upsert a student's answers for a date. Bypasses the daily deadline."""
+    room = _get_room_or_404(db, room_id)
+    student = db.scalar(select(Student).where(Student.room_id == room_id, Student.id == student_id))
+    if student is None:
+        raise HTTPException(status_code=404, detail="Student not found")
+
+    task_map = {task.id: task for task in room.tasks if task.is_active}
+    for answer in payload.answers:
+        task = task_map.get(answer.task_id)
+        if task is None:
+            raise HTTPException(status_code=400, detail=f"Task {answer.task_id} is not available in this room")
+        completion = db.scalar(
+            select(Completion).where(
+                Completion.student_id == student.id,
+                Completion.task_id == task.id,
+                Completion.date == payload.date,
+            )
+        )
+        is_completed, points_earned = calculate_task_score(task, answer.value)
+        if completion is None:
+            completion = Completion(
+                student_id=student.id,
+                room_id=room.id,
+                task_id=task.id,
+                date=payload.date,
+                value=answer.value,
+                is_completed=is_completed,
+                points_earned=points_earned,
+                submitted_via="organizer",
+            )
+        else:
+            completion.value = answer.value
+            completion.is_completed = is_completed
+            completion.points_earned = points_earned
+            completion.submitted_via = "organizer"
+        db.add(completion)
+
+    db.commit()
+    await _broadcast_leaderboard(db, room.id)
+    return get_student_daily_result(db, room, student, payload.date)
+
+
+@router.delete("/{room_id}/students/{student_id}/completions", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_student_completions(
+    room_id: int,
+    student_id: int,
+    completion_date: date = Query(...),
+    db: Session = Depends(get_db),
+    _current_organizer=Depends(get_current_organizer),
+) -> Response:
+    """Organizer override: remove a student's whole submission for a given date."""
+    _get_room_or_404(db, room_id)
+    student = db.scalar(select(Student).where(Student.room_id == room_id, Student.id == student_id))
+    if student is None:
+        raise HTTPException(status_code=404, detail="Student not found")
+
+    completions = db.scalars(
+        select(Completion).where(
+            Completion.room_id == room_id,
+            Completion.student_id == student_id,
+            Completion.date == completion_date,
+        )
+    ).all()
+    for completion in completions:
+        db.delete(completion)
+    db.commit()
+    await _broadcast_leaderboard(db, room_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
