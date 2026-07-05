@@ -2,17 +2,24 @@ from collections import defaultdict
 from datetime import date, timedelta
 from statistics import median as _median
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.models.entities import Completion, Room, Task, TaskType
 from app.schemas.common import (
+    CombinedDailyStat,
+    CombinedLeaderboardRow,
     DailyParticipation,
+    MultiRoomAnalyticsResponse,
+    MultiRoomSummary,
+    RoomAnalyticsBlock,
     RoomAnalyticsResponse,
+    RoomComparisonRow,
     StudentAnalytics,
     StudentTaskTotal,
     TaskAnalytics,
 )
+from app.services.scoring import build_leaderboard
 
 NUMERIC_TASK_TYPES = {TaskType.quantity, TaskType.range}
 BONUS_TASK_NAME = "__bonus_all_required__"
@@ -146,4 +153,76 @@ def build_room_analytics(db: Session, room: Room) -> RoomAnalyticsResponse:
         tasks=task_analytics,
         students=student_analytics,
         daily_participation=daily_participation,
+    )
+
+
+def build_multi_room_analytics(db: Session, rooms: list[Room]) -> MultiRoomAnalyticsResponse:
+    blocks = []
+    all_days = set()
+    total_students = 0
+    for room in rooms:
+        analytics = build_room_analytics(db, room)
+        blocks.append(RoomAnalyticsBlock(room_id=room.id, room_name=room.name, analytics=analytics))
+        total_students += len(room.students)
+        for dp in analytics.daily_participation:
+            all_days.add(dp.date)
+    summary = MultiRoomSummary(room_count=len(rooms), total_students=total_students,
+                               total_distinct_days=len(all_days))
+
+    # Combined leaderboard (points only, distinct students per room) + room comparison
+    combined_rows = []
+    comparison = []
+    for room in rooms:
+        lb = build_leaderboard(db, room, respect_visibility=False)
+        name_map = {s.id: s.name for s in room.students}
+        room_total = 0.0
+        for r in lb:
+            combined_rows.append({
+                "student_id": r.student_id,
+                "student_name": name_map.get(r.student_id, r.display_name),
+                "room_id": room.id,
+                "room_name": room.name,
+                "total_points": r.total_points,
+                "today_points": r.today_points,
+                "completed_days": r.completed_days,
+            })
+            room_total += r.total_points
+        count = len(room.students)
+        comparison.append(RoomComparisonRow(
+            room_id=room.id, room_name=room.name, student_count=count,
+            total_points=room_total, average_points=(room_total / count if count else 0.0),
+        ))
+    combined_rows.sort(key=lambda d: (-d["total_points"], d["student_name"].lower()))
+    combined_leaderboard = [CombinedLeaderboardRow(position=i, **d) for i, d in enumerate(combined_rows, start=1)]
+    comparison.sort(key=lambda c: -c.total_points)
+
+    # Combined daily: active students summed across rooms + points per date
+    active_by_date: dict[date, int] = defaultdict(int)
+    for block in blocks:
+        for dp in block.analytics.daily_participation:
+            active_by_date[dp.date] += dp.active_students
+
+    room_ids = [r.id for r in rooms]
+    point_rows = db.execute(
+        select(Completion.date, func.coalesce(func.sum(Completion.points_earned), 0))
+        .where(Completion.room_id.in_(room_ids))
+        .group_by(Completion.date)
+    ).all()
+    points_by_date = {d: float(p) for d, p in point_rows}
+
+    combined_daily = [
+        CombinedDailyStat(
+            date=day,
+            active_students=active_by_date.get(day, 0),
+            points=points_by_date.get(day, 0.0),
+        )
+        for day in sorted(set(active_by_date) | set(points_by_date))
+    ]
+
+    return MultiRoomAnalyticsResponse(
+        summary=summary,
+        rooms=blocks,
+        combined_leaderboard=combined_leaderboard,
+        room_comparison=comparison,
+        combined_daily=combined_daily,
     )
