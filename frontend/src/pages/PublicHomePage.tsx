@@ -77,6 +77,7 @@ export function PublicHomePage() {
   const [roomCode, setRoomCode] = useState("");
   const [error, setError] = useState("");
   const [videoSrc, setVideoSrc] = useState("/onboarding-demo.mp4");
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     let objectUrl: string | null = null;
@@ -109,6 +110,35 @@ export function PublicHomePage() {
       if (objectUrl) {
         URL.revokeObjectURL(objectUrl);
       }
+    };
+  }, []);
+
+  useEffect(() => {
+    // Prevent iOS autofill autofocus on mount
+    const timer = setTimeout(() => setIsReady(true), 600);
+
+    if (!window.matchMedia("(pointer: coarse)").matches)
+      return () => clearTimeout(timer);
+
+    const blurActive = () => {
+      [10, 100, 300].forEach((delay) => {
+        setTimeout(() => {
+          if (
+            document.activeElement?.tagName === "INPUT" ||
+            document.activeElement?.tagName === "TEXTAREA"
+          ) {
+            (document.activeElement as HTMLElement).blur();
+          }
+        }, delay);
+      });
+    };
+    blurActive();
+    // bfcache restores (back/forward navigation) re-focus the input
+    // without re-running mount effects.
+    window.addEventListener("pageshow", blurActive);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("pageshow", blurActive);
     };
   }, []);
 
@@ -274,7 +304,11 @@ export function PublicHomePage() {
                       id="room-code-input"
                       name="roomCode"
                       autoComplete="off"
+                      autoCapitalize="characters"
+                      data-1p-ignore
+                      data-lpignore="true"
                       spellCheck={false}
+                      readOnly={!isReady}
                       size="3"
                       maxLength={12}
                       placeholder="ENTER ROOM CODE"
@@ -317,7 +351,7 @@ export function PublicHomePage() {
           >
             {/* iPhone 13 Frame */}
             <Box
-              className="relative w-full max-w-[300px] aspect-[9/18.5] bg-black p-[9px] border-[4px] border-[#3a3a3c] shadow-2xl mx-auto"
+              className="relative w-full max-w-[300px] aspect-[9/18.5] bg-black border-[4px] border-[#3a3a3c] shadow-2xl mx-auto"
               style={{ borderRadius: "48px" }}
             >
               {/* Side button protrusions */}
@@ -328,12 +362,21 @@ export function PublicHomePage() {
 
               {/* Screen Area */}
               <Box
-                className="relative w-full h-full bg-[#09090b] overflow-hidden flex flex-col border-black"
-                style={{ borderRadius: "37px" }}
+                className="absolute top-[9px] bottom-[9px] left-[9px] right-[9px] bg-[#09090b] overflow-hidden flex flex-col border-black"
+                style={{
+                  borderRadius: "37px",
+                  // Safari won't clip the composited <video> layer with just
+                  // overflow:hidden + border-radius; mask-image and backface visibility forces it.
+                  WebkitMaskImage: "-webkit-radial-gradient(white, black)",
+                  WebkitBackfaceVisibility: "hidden",
+                  MozBackfaceVisibility: "hidden",
+                  transform: "translate3d(0, 0, 0)",
+                  zIndex: 1,
+                }}
               >
                 {/* iPhone 13 Notch (inside the screen) */}
                 <Box
-                  className="absolute top-0 left-1/2 -translate-x-1/2 w-[76px] h-[18px] bg-black z-50 flex items-center justify-between px-[6px]"
+                  className="absolute top-0 left-1/2 -translate-x-1/2 w-[76px] h-[19px] bg-black z-50 flex items-center justify-between px-[6px]"
                   style={{
                     borderBottomLeftRadius: "11px",
                     borderBottomRightRadius: "11px",
@@ -358,6 +401,7 @@ export function PublicHomePage() {
                     muted
                     playsInline
                     className="w-full h-full object-cover pointer-events-none"
+                    style={{ borderRadius: "37px" }}
                   />
                 </Box>
 
