@@ -8,7 +8,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.models.entities import Completion, Punishment, Room, Student, Task
-from app.services.analytics import BONUS_TASK_NAME, build_room_analytics
+from app.services.analytics import BONUS_TASK_NAME, build_multi_room_analytics, build_room_analytics
 from app.services.scoring import build_bonus_maps, build_leaderboard
 
 
@@ -262,6 +262,38 @@ def export_multi_room_to_workbook(db: Session, rooms: list[Room]) -> BytesIO:
     _bold_row(overview_sheet, 5)
     for room, analytics in room_analytics:
         overview_sheet.append([room.name, len(room.students), len(analytics.daily_participation)])
+
+    agg = build_multi_room_analytics(db, rooms)
+
+    leaderboard_sheet = workbook.create_sheet("Combined Leaderboard")
+    leaderboard_sheet.append(
+        ["Rank", "Student", "Room", "Total points", "Today points", "Completed days"]
+    )
+    _bold_row(leaderboard_sheet, 1)
+    for entry in agg.combined_leaderboard:
+        leaderboard_sheet.append(
+            [
+                entry.position,
+                entry.student_name,
+                entry.room_name,
+                entry.total_points,
+                entry.today_points,
+                entry.completed_days,
+            ]
+        )
+
+    comparison_sheet = workbook.create_sheet("Room Comparison")
+    comparison_sheet.append(["Room", "Students", "Total points", "Average points"])
+    _bold_row(comparison_sheet, 1)
+    for entry in agg.room_comparison:
+        comparison_sheet.append(
+            [
+                entry.room_name,
+                entry.student_count,
+                entry.total_points,
+                round(entry.average_points, 1),
+            ]
+        )
 
     for room, analytics in room_analytics:
         tasks = db.scalars(
