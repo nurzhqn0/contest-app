@@ -1,6 +1,12 @@
+import math
 from collections import defaultdict
 from datetime import date
 from decimal import Decimal
+
+# Largest quantity a single submission may contribute. Anything above this is a
+# junk/overflow entry (e.g. a thousand-digit number) and is rejected outright so
+# it can never overflow to inf and break JSON serialization of scores.
+MAX_QUANTITY = 1e9
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
@@ -19,17 +25,30 @@ def _boolish(raw: str) -> bool:
     return raw.strip().lower() in {"yes", "y", "да", "д", "true", "1", "выполнено", "ok"}
 
 
+def _round2(value: float) -> float:
+    return round(float(value), 2)
+
+
+def _parse_quantity(raw_value: str) -> float | None:
+    try:
+        value = float(raw_value)
+    except (ValueError, OverflowError):
+        return None
+    if not math.isfinite(value) or abs(value) > MAX_QUANTITY:
+        return None
+    return value
+
+
 def calculate_task_score(task: Task, raw_value: str) -> tuple[bool, float]:
     if task.type == TaskType.quantity:
-        try:
-            value = float(raw_value)
-        except ValueError:
+        value = _parse_quantity(raw_value)
+        if value is None:
             return False, 0.0
         target = _to_float(task.target)
         if value < target:
             return False, 0.0
         bonus_units = max(0.0, value - target)
-        return True, task.points + bonus_units * task.bonus_per_unit
+        return True, _round2(task.points + bonus_units * task.bonus_per_unit)
 
     if task.type == TaskType.range:
         try:
@@ -157,8 +176,8 @@ def build_leaderboard(
                 student_id=student.id,
                 position=index,
                 display_name=display_name_for_student(student, room, current_student_id=current_student_id, position=index),
-                total_points=total_points if exact_score_visible else 0.0,
-                today_points=today_points if exact_score_visible else 0.0,
+                total_points=_round2(total_points) if exact_score_visible else 0.0,
+                today_points=_round2(today_points) if exact_score_visible else 0.0,
                 completed_days=days,
                 last_submission_at=student.last_submission_at,
                 score_visible=exact_score_visible,

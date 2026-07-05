@@ -208,7 +208,7 @@ def list_students(room_id: int, db: Session = Depends(get_db), _current_organize
     total_bonus_by_student, _ = build_bonus_maps(db, room)
     return [
         StudentResponse.model_validate(student, from_attributes=True).model_copy(
-            update={"total_score": float(totals.get(student.id, 0)) + total_bonus_by_student.get(student.id, 0.0)}
+            update={"total_score": round(float(totals.get(student.id, 0)) + total_bonus_by_student.get(student.id, 0.0), 2)}
         )
         for student in students
     ]
