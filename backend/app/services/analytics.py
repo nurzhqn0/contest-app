@@ -1,3 +1,4 @@
+import math
 from collections import defaultdict
 from datetime import date, timedelta
 from statistics import median as _median
@@ -19,7 +20,7 @@ from app.schemas.common import (
     StudentTaskTotal,
     TaskAnalytics,
 )
-from app.services.scoring import build_leaderboard
+from app.services.scoring import MAX_QUANTITY, build_leaderboard
 
 NUMERIC_TASK_TYPES = {TaskType.quantity, TaskType.range}
 BONUS_TASK_NAME = "__bonus_all_required__"
@@ -27,9 +28,12 @@ BONUS_TASK_NAME = "__bonus_all_required__"
 
 def _parse_numeric(raw: str) -> float | None:
     try:
-        return float(raw)
-    except (TypeError, ValueError):
+        value = float(raw)
+    except (TypeError, ValueError, OverflowError):
         return None
+    if not math.isfinite(value) or abs(value) > MAX_QUANTITY:
+        return None
+    return value
 
 
 def _longest_streak(days: set[date]) -> int:
