@@ -8,6 +8,9 @@ from sqlalchemy.orm import Session
 from app.models.entities import Completion, Room, Task, TaskType
 from app.schemas.common import (
     DailyParticipation,
+    MultiRoomAnalyticsResponse,
+    MultiRoomSummary,
+    RoomAnalyticsBlock,
     RoomAnalyticsResponse,
     StudentAnalytics,
     StudentTaskTotal,
@@ -147,3 +150,18 @@ def build_room_analytics(db: Session, room: Room) -> RoomAnalyticsResponse:
         students=student_analytics,
         daily_participation=daily_participation,
     )
+
+
+def build_multi_room_analytics(db: Session, rooms: list[Room]) -> MultiRoomAnalyticsResponse:
+    blocks = []
+    all_days = set()
+    total_students = 0
+    for room in rooms:
+        analytics = build_room_analytics(db, room)
+        blocks.append(RoomAnalyticsBlock(room_id=room.id, room_name=room.name, analytics=analytics))
+        total_students += len(room.students)
+        for dp in analytics.daily_participation:
+            all_days.add(dp.date)
+    summary = MultiRoomSummary(room_count=len(rooms), total_students=total_students,
+                               total_distinct_days=len(all_days))
+    return MultiRoomAnalyticsResponse(summary=summary, rooms=blocks)

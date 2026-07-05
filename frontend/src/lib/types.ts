@@ -146,6 +146,23 @@ export interface RoomAnalytics {
   daily_participation: DailyParticipation[];
 }
 
+export interface RoomAnalyticsBlock {
+  room_id: number;
+  room_name: string;
+  analytics: RoomAnalytics;
+}
+
+export interface MultiRoomSummary {
+  room_count: number;
+  total_students: number;
+  total_distinct_days: number;
+}
+
+export interface MultiRoomAnalytics {
+  summary: MultiRoomSummary;
+  rooms: RoomAnalyticsBlock[];
+}
+
 export interface PublicRoom {
   id: number;
   name: string;
