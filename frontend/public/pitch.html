@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Student Contest Platform — Product Brief</title>
+<style>
+  :root{
+    --paper: #EEF1EF;
+    --paper-raised: #FFFFFF;
+    --ink: #12161C;
+    --muted: #5B6570;
+    --line: rgba(18,22,28,0.14);
+    --accent: #D9560E;
+    --accent-ink: #FFFFFF;
+    --accent-2: #0E7C6B;
+    --shadow: 0 1px 0 rgba(18,22,28,0.06);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --paper: #0D1013;
+      --paper-raised: #14181D;
+      --ink: #EDEFEF;
+      --muted: #98A2AA;
+      --line: rgba(255,255,255,0.14);
+      --accent: #FF8A3D;
+      --accent-ink: #14181D;
+      --accent-2: #35B7A0;
+      --shadow: 0 1px 0 rgba(0,0,0,0.4);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper: #0D1013;
+    --paper-raised: #14181D;
+    --ink: #EDEFEF;
+    --muted: #98A2AA;
+    --line: rgba(255,255,255,0.14);
+    --accent: #FF8A3D;
+    --accent-ink: #14181D;
+    --accent-2: #35B7A0;
+    --shadow: 0 1px 0 rgba(0,0,0,0.4);
+  }
+  :root[data-theme="light"]{
+    --paper: #EEF1EF;
+    --paper-raised: #FFFFFF;
+    --ink: #12161C;
+    --muted: #5B6570;
+    --line: rgba(18,22,28,0.14);
+    --accent: #D9560E;
+    --accent-ink: #FFFFFF;
+    --accent-2: #0E7C6B;
+    --shadow: 0 1px 0 rgba(18,22,28,0.06);
+  }
+
+  *{ box-sizing: border-box; }
+  body{
+    margin:0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .serif{
+    font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
+  }
+  .mono{
+    font-family: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+  .wrap{
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 0 28px;
+  }
+  a{ color: inherit; }
+
+  /* top bar */
+  .topbar{
+    border-bottom: 1px solid var(--line);
+  }
+  .topbar-inner{
+    display:flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 0;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .topbar-inner strong{ color: var(--ink); }
+
+  /* hero */
+  .hero{
+    padding: 64px 0 56px;
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 48px;
+    align-items: start;
+  }
+  @media (max-width: 720px){
+    .hero{ grid-template-columns: 1fr; padding-top: 44px; }
+  }
+  .eyebrow{
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin: 0 0 14px;
+  }
+  h1{
+    font-size: clamp(2.1rem, 4.6vw, 3.15rem);
+    line-height: 1.08;
+    margin: 0 0 20px;
+    text-wrap: balance;
+    font-weight: 600;
+  }
+  .lede{
+    font-size: 1.08rem;
+    color: var(--muted);
+    max-width: 46ch;
+    margin: 0 0 28px;
+  }
+  .hero-ctas{
+    display:flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding: 11px 18px;
+    border-radius: 3px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    border: 1px solid transparent;
+  }
+  .btn-primary{
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+  .btn-ghost{
+    border-color: var(--line);
+    color: var(--ink);
+  }
+
+  /* live leaderboard card */
+  .board{
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .board-head{
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--line);
+    display:flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .board-room{
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  .live-tag{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    color: var(--accent-2);
+    font-weight: 700;
+  }
+  .live-dot{
+    width:6px; height:6px; border-radius:50%;
+    background: var(--accent-2);
+    animation: pulse 1.8s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce){
+    .live-dot{ animation: none; }
+  }
+  @keyframes pulse{
+    0%,100%{ opacity: 1; }
+    50%{ opacity: 0.35; }
+  }
+  .row{
+    display:grid;
+    grid-template-columns: 22px 1fr auto auto;
+    gap: 12px;
+    align-items:center;
+    padding: 11px 18px;
+    border-bottom: 1px solid var(--line);
+    font-size: 0.88rem;
+  }
+  .row:last-child{ border-bottom:none; }
+  .row .pos{ color: var(--muted); }
+  .row .pts{ font-weight: 600; }
+  .row .streak{ color: var(--muted); font-size: 0.78rem; white-space: nowrap; }
+  .board-foot{
+    padding: 10px 18px;
+    font-size: 0.76rem;
+    color: var(--muted);
+  }
+
+  /* sections */
+  section{ padding: 40px 0; border-top: 1px solid var(--line); }
+  h2{
+    font-size: clamp(1.3rem, 2.6vw, 1.65rem);
+    margin: 0 0 14px;
+    font-weight: 600;
+    text-wrap: balance;
+  }
+  .section-intro{
+    color: var(--muted);
+    max-width: 62ch;
+    margin: 0 0 28px;
+  }
+
+  /* pillars */
+  .pillars{
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+  }
+  @media (max-width: 680px){
+    .pillars{ grid-template-columns: 1fr; }
+  }
+  .pillar{
+    background: var(--paper-raised);
+    padding: 22px 20px;
+  }
+  .pillar-tag{
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .pillar h3{
+    margin: 0 0 8px;
+    font-size: 1.02rem;
+    font-weight: 600;
+  }
+  .pillar p{
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  /* spec ledger */
+  .ledger{ border-top: 1px solid var(--line); }
+  .spec{
+    display:grid;
+    grid-template-columns: 220px 1fr;
+    gap: 24px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  @media (max-width: 620px){
+    .spec{ grid-template-columns: 1fr; gap: 6px; }
+  }
+  .spec-label{
+    font-weight: 600;
+    font-size: 0.92rem;
+  }
+  .spec-desc{
+    color: var(--muted);
+    font-size: 0.92rem;
+  }
+
+  /* flow */
+  .flow{ display:flex; flex-direction:column; }
+  .step{
+    display:grid;
+    grid-template-columns: 40px 1fr;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .step:last-child{ border-bottom: none; }
+  .step-num{
+    font-size: 0.85rem;
+    color: var(--accent);
+    font-weight: 700;
+    padding-top: 2px;
+  }
+  .step-body b{ font-weight: 600; }
+  .step-body{ font-size: 0.94rem; color: var(--ink); }
+  .step-body span{ color: var(--muted); }
+
+  /* CTA */
+  .cta{
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 32px 28px;
+    display:flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .cta h2{ margin: 0 0 6px; }
+  .cta p{ margin:0; color: var(--muted); max-width: 42ch; }
+
+  footer{
+    padding: 28px 0 48px;
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap topbar-inner">
+    <span><strong>Student Contest Platform</strong> — product brief</span>
+    <span>Prepared for review</span>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <section class="hero" style="border-top:none;">
+    <div>
+      <p class="eyebrow">Web dashboard · Telegram bot · Live leaderboard</p>
+      <h1 class="serif">Run a contest your students actually finish.</h1>
+      <p class="lede">One system for scoring, standings, and communication — an organizer dashboard on the web, a Telegram bot for students, and a public leaderboard that updates the moment a submission lands.</p>
+      <div class="hero-ctas">
+        <a class="btn btn-primary" href="https://t.me/nurzhqn0" target="_blank" rel="noopener">Ask for a walkthrough</a>
+        <a class="btn btn-ghost" href="https://contest.nurzhqn.com" target="_blank" rel="noopener">See how it works</a>
+      </div>
+    </div>
+
+    <div class="board" aria-label="Sample live leaderboard">
+      <div class="board-head">
+        <span class="board-room">Algebra Sprint — Cohort 4</span>
+        <span class="live-tag"><span class="live-dot"></span>LIVE</span>
+      </div>
+      <div class="row"><span class="pos mono">1</span><span>Aigerim T.</span><span class="pts mono">128.5</span><span class="streak">6-day streak</span></div>
+      <div class="row"><span class="pos mono">2</span><span>Nurlan K.</span><span class="pts mono">121.0</span><span class="streak">5-day streak</span></div>
+      <div class="row"><span class="pos mono">3</span><span>Dias M.</span><span class="pts mono">118.5</span><span class="streak">6-day streak</span></div>
+      <div class="row"><span class="pos mono">4</span><span>Saltanat Y.</span><span class="pts mono">109.0</span><span class="streak">4-day streak</span></div>
+      <div class="board-foot mono">42 students · day 6 of 14 · updates live</div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="serif">The problem with running a contest in a group chat</h2>
+    <p class="section-intro">Multi-week contests are usually run over a Telegram group and a spreadsheet: submissions scattered across messages, standings updated by hand once a day, and no way to stop a student from typing an impossible number to jump the board. It works for a week. It falls apart by week three.</p>
+  </section>
+
+  <section>
+    <h2 class="serif">Three pieces, one system</h2>
+    <div class="pillars">
+      <div class="pillar">
+        <p class="pillar-tag">ORGANIZER</p>
+        <h3>Web Dashboard</h3>
+        <p>Create rooms, define tasks and scoring rules, manage students, watch analytics, export results — behind a login only organizers can reach.</p>
+      </div>
+      <div class="pillar">
+        <p class="pillar-tag">STUDENT</p>
+        <h3>Telegram Bot</h3>
+        <p>Join with a room code, no app to install. <span class="mono">/tasks</span>, <span class="mono">/result</span>, <span class="mono">/rank</span> — plus reminders the bot sends on its own.</p>
+      </div>
+      <div class="pillar">
+        <p class="pillar-tag">PUBLIC</p>
+        <h3>Live Leaderboard</h3>
+        <p>A link anyone can watch — parents, sponsors, the whole school. No login, no install, updates as scores come in.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="serif">Built in, not bolted on</h2>
+    <p class="section-intro">The parts that usually get skipped in a hand-rolled contest tracker are the parts this was built around.</p>
+    <div class="ledger">
+      <div class="spec">
+        <div class="spec-label">Real-time standings</div>
+        <div class="spec-desc">Leaderboard updates the instant a submission is scored — no refresh, no waiting.</div>
+      </div>
+      <div class="spec">
+        <div class="spec-label">Scoring guardrails</div>
+        <div class="spec-desc">Every submitted number is checked against a sane upper bound before it touches a score, so one mistyped or gamed answer can't blow up the standings.</div>
+      </div>
+      <div class="spec">
+        <div class="spec-label">Organizer override</div>
+        <div class="spec-desc">Any submission can be corrected or removed after the fact, with points and rank recalculated immediately.</div>
+      </div>
+      <div class="spec">
+        <div class="spec-label">Automated engagement</div>
+        <div class="spec-desc">The bot sends daily reminders and end-of-day summaries in Telegram, so participation doesn't rely on organizers chasing people.</div>
+      </div>
+      <div class="spec">
+        <div class="spec-label">Analytics per room</div>
+        <div class="spec-desc">Participation streaks, per-task breakdowns, and side-by-side comparisons across rooms for programs running several cohorts at once.</div>
+      </div>
+      <div class="spec">
+        <div class="spec-label">Reporting</div>
+        <div class="spec-desc">One-click <span class="mono">.xlsx</span> export of results — ready for certificates, prize lists, or a report to the board.</div>
+      </div>
+      <div class="spec">
+        <div class="spec-label">Organizer-only access</div>
+        <div class="spec-desc">Only organizers can log in to the dashboard. Students only ever see the bot and the public page — never an admin surface.</div>
+      </div>
+      <div class="spec">
+        <div class="spec-label">Self-hosted</div>
+        <div class="spec-desc">Runs on your own domain, so contest and student data stay on infrastructure you control — not a third party's servers.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="how-it-works">
+    <h2 class="serif">How a contest runs, start to finish</h2>
+    <div class="flow">
+      <div class="step">
+        <div class="step-num mono">01</div>
+        <div class="step-body"><b>Organizer sets up a room</b> — adds tasks and scoring rules, gets a room code to share. <span>(web dashboard)</span></div>
+      </div>
+      <div class="step">
+        <div class="step-num mono">02</div>
+        <div class="step-body"><b>Students join with the code</b> — nothing to install beyond Telegram, which they already have. <span>(bot)</span></div>
+      </div>
+      <div class="step">
+        <div class="step-num mono">03</div>
+        <div class="step-body"><b>Students submit in chat</b> — the bot validates and scores each answer instantly. <span>(bot)</span></div>
+      </div>
+      <div class="step">
+        <div class="step-num mono">04</div>
+        <div class="step-body"><b>Standings update live</b> — the leaderboard and public page reflect it immediately, no refresh. <span>(live page)</span></div>
+      </div>
+      <div class="step">
+        <div class="step-num mono">05</div>
+        <div class="step-body"><b>The bot keeps the room active</b> — daily reminders and end-of-day summaries land automatically. <span>(bot)</span></div>
+      </div>
+      <div class="step">
+        <div class="step-num mono">06</div>
+        <div class="step-body"><b>Organizer closes it out</b> — corrects anything that needs it, exports final results to .xlsx. <span>(web dashboard)</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="cta">
+      <div>
+        <h2 class="serif">Bring this to your next cohort.</h2>
+        <p>Happy to walk through a live room, or set one up for your first contest.</p>
+      </div>
+      <a class="btn btn-primary" href="https://t.me/nurzhqn0" target="_blank" rel="noopener">Get in touch</a>
+    </div>
+  </section>
+
+  <footer>
+    Student Contest Platform — organizer dashboard, Telegram bot, and public leaderboard for running academic and cohort-based contests.
+  </footer>
+
+</div>
+</body>
+</html>
