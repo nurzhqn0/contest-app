@@ -255,6 +255,23 @@ class RoomAnalyticsResponse(BaseModel):
     daily_participation: list[DailyParticipation]
 
 
+class RoomAnalyticsBlock(BaseModel):
+    room_id: int
+    room_name: str
+    analytics: RoomAnalyticsResponse
+
+
+class MultiRoomSummary(BaseModel):
+    room_count: int
+    total_students: int
+    total_distinct_days: int
+
+
+class MultiRoomAnalyticsResponse(BaseModel):
+    summary: MultiRoomSummary
+    rooms: list[RoomAnalyticsBlock]
+
+
 class PublicRoomLookupRequest(BaseModel):
     room_code: str
 

@@ -1,6 +1,7 @@
 import { ReactElement } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AppShell } from "./components/AppShell";
+import { CombinedAnalyticsPage } from "./pages/CombinedAnalyticsPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { LegalPage } from "./pages/LegalPage";
 import { LoginPage } from "./pages/LoginPage";
@@ -84,6 +85,7 @@ export function App() {
         }
       >
         <Route index element={<DashboardPage />} />
+        <Route path="analytics" element={<CombinedAnalyticsPage />} />
         <Route path="rooms/:roomId" element={<RoomPage />} />
       </Route>
       <Route path="*" element={<NotFoundPage />} />

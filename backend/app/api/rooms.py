@@ -1,6 +1,6 @@
 from datetime import date, datetime
 
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 
@@ -9,6 +9,7 @@ from app.db.session import get_db
 from app.models.entities import Completion, Punishment, Room, Student, Task
 from app.schemas.common import (
     LeaderboardRow,
+    MultiRoomAnalyticsResponse,
     ProgressRow,
     RoomAnalyticsResponse,
     PunishmentCreate,
@@ -24,9 +25,9 @@ from app.schemas.common import (
     TaskResponse,
     TaskUpdate,
 )
-from app.services.analytics import build_room_analytics
+from app.services.analytics import build_multi_room_analytics, build_room_analytics
 from app.services.codegen import generate_room_code
-from app.services.exporter import export_room_to_workbook
+from app.services.exporter import export_multi_room_to_workbook, export_room_to_workbook
 from app.services.scoring import build_bonus_maps, build_leaderboard, build_progress_rows
 from app.websocket.manager import room_socket_manager
 
@@ -283,6 +284,33 @@ def room_progress(
 ) -> list[ProgressRow]:
     room = _get_room_or_404(db, room_id)
     return build_progress_rows(db, room, progress_date or date.today(), respect_visibility=False)
+
+
+@router.get("/analytics/aggregate", response_model=MultiRoomAnalyticsResponse)
+def multi_room_analytics(
+    room_ids: list[int] = Query(..., min_length=1),
+    db: Session = Depends(get_db),
+    _current_organizer=Depends(get_current_organizer),
+) -> MultiRoomAnalyticsResponse:
+    rooms = [_get_room_or_404(db, rid) for rid in room_ids]
+    return build_multi_room_analytics(db, rooms)
+
+
+@router.get("/analytics/aggregate/export")
+def multi_room_export(
+    room_ids: list[int] = Query(..., min_length=1),
+    db: Session = Depends(get_db),
+    _current_organizer=Depends(get_current_organizer),
+) -> Response:
+    rooms = [_get_room_or_404(db, rid) for rid in room_ids]
+    buf = export_multi_room_to_workbook(db, rooms)
+    filename = "combined-analytics.xlsx"
+    headers = {"Content-Disposition": f'attachment; filename="{filename}"'}
+    return Response(
+        content=buf.getvalue(),
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers=headers,
+    )
 
 
 @router.get("/{room_id}/analytics", response_model=RoomAnalyticsResponse)
